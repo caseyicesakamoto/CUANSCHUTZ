@@ -25,7 +25,7 @@ MH_subj = MH_subj%>% select(-X)
 patient_df = full_join(MH_subj, patient_t1_df, by="sid") %>% select(-c("X", "visit.x"))
 patient_df = full_join(patient_load, patient_df, by="sid")
 patient_df = full_join(patient_df, cult3, by="sid")
-rm(MH_subj,patient_t1_df, outpatient_2vis, patient_load, cult3)
+rm(MH_subj,patient_t1_df,patient_load, cult3)
 #####---------------#######
 ###### Change in FEV vs change in MH #####
 FEV_BD_cor = ggplot(data = patient_df) + 
@@ -59,22 +59,16 @@ print(FEV_cfu_cor)
 cor(patient_df$changeCFU, patient_df$change_fev_perc_v1v2, use = "complete.obs")
 
 ####### save plots
-ggsave("20200204FEV_BD_corr.png", plot = FEV_BD_cor)
-ggsave("20200204FEV_load_corr.png", plot = FEV_load_cor)
-ggsave("20200204FEV_cfu_corr.png", plot = FEV_cfu_cor)
+ggsave("20200204FEV_BD_corr.tiff", plot = FEV_BD_cor)
+ggsave("20200204FEV_load_corr.tiff", plot = FEV_load_cor)
+ggsave("20200204FEV_cfu_corr.tiff", plot = FEV_cfu_cor)
 
 
 
 ##### alpha diversity #####
-#outpatient_2vis <- read.csv("C:/Users/Casey/Desktop/research/outpatient_2vis.csv")
-sublist = c("BAM014", "BSN024", "ESP008", "MEB022", "NDR020", "SKH012", "VAC001", "VCR009", "A_MO25")
-
-#outpatient_alpha = outpatient_2vis %>% filter(visit ==1) %>% 
-#  select(sid, seq_count, last)%>% filter(!(sid %in% sublist))
-#outpatient_alpha = na.omit(outpatient_alpha) # remove na
-#oa = spread(outpatient_alpha, key = last, value = seq_count)%>%select(-sid)
-#H = diversity(oa, MARGIN = 2)
-#fivenum(H)
+# used shannons H
 outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/research/20200128plots/outpatient2020_01_25.csv")
-shm = outpatient2020_01_25 %>% select(visit,sid, ShannonH_Median) %>% filter(!(sid %in% sublist)&visit==1)%>% unique.data.frame()%>%na.omit()
-fivenum(shm$ShannonH_Median)
+shm = outpatient2020_01_25 %>% select(visit,sid, ShannonH_Median, ShannonH_Mean) %>%
+  filter(!(sid %in% sublist)&visit==1)%>% unique.data.frame()%>%na.omit()
+# similar enough
+fivenum(shm$ShannonH_Median);fivenum(shm$ShannonH_Mean)
