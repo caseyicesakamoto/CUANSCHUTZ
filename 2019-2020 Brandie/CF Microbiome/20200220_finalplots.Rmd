@@ -111,29 +111,29 @@ ggsave("MH_outer_qtls.tiff", plot = outer_quart, dpi = 300)
 ```
 
 ```{r stacked barcharts}
-##### stacked barcharts #####
 # dropping those without 2 visits
-outpatient_2vv = outpatient_2vv %>%  filter(!(
-  sid == "BAM014"|sid=="BSN024"|sid=="ESP008"|sid=="MEB022"|
-    sid=="NDR020"|sid=="SKH012"|sid=="VCR009"|sid=="VAC001"|sid=="A_MO25"))
+outpatient_cutoff5 = outpatient2v %>% filter(perc_total > 5)
 
-outpatient_cutoff5 = outpatient_2vv %>% filter(perc_total > 5)
-#describe(outpatient_cutoff5$last)
-
+# position for barchart labels
 outpatient_cutoff5 = outpatient_cutoff5 %>% group_by(last) %>% mutate(pos = cumsum(perc_total) - (0.5)* perc_total)
 
 # stack labels
 taxa_sbc_c5 = ggplot(data = outpatient_cutoff5,
-                     aes(x = visit.x, y = perc_total, fill = last, label = last)) + 
-  geom_bar(stat = "identity") + facet_wrap(~sid_new) +
-  theme(legend.position = "none")+ 
+                     aes(x = visit, y = perc_total, fill = last, label = last)) + 
+  geom_bar(stat = "identity") + facet_wrap(~sid_new)+
   geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
 
-taxa_sbc_c5 = taxa_sbc_c5 + labs(title = "Change in Community Composition Within Subjects",
+taxa_sbc_c5 = taxa_sbc_c5 + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Change in Community Composition Within Subjects",
                                  x = "Visit", 
                                  y = "Total Percent of Community")
-ggsave("20200128_sbc_c5.tiff", plot = taxa_sbc_c5, height = 12, width = 12)
 
+ggsave("20200128_sbc_c5.tiff", plot = taxa_sbc_c5, height = 12, width = 12)
+```
+
+```{r spaghetti plots}
 ##### spaghetti plots #####
 library(data.table)
 sublist = c("BAM014", "BSN024", "ESP008", "MEB022", "NDR020", "SKH012", "VAC001", "VCR009", "A_MO25")
@@ -155,6 +155,5 @@ lq_all_noodle = lq_all_noodle  + geom_label_repel(point.padding = NA,
                                                   size = 4)
 #print(lq_all_noodle)
 ggsave("20200128_spaghetti_plot.tiff", plot = lq_all_noodle, height = 12, width = 12)
-# ==============================================================================#
 ```
 
