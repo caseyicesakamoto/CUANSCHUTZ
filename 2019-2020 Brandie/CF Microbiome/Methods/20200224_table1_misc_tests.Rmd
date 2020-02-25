@@ -3,8 +3,8 @@ title: "20200224_Table1_Final"
 author: "Casey Sakamoto"
 date: "2/24/2020"
 output:
-  word_document: default
   pdf_document: default
+  word_document: default
 ---
 This is final version (instead of 20200101_table1.r)
 (i messed up on version control)
@@ -15,9 +15,10 @@ library(tidyverse)
 library(tableone)
 library(readxl)
 library(knitr)
-outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/DataSets/Microbiome Brandie 2019-2020/outpatient2020_01_25.csv")
-cult3 <- read_excel("D:/DataSets/Microbiome Brandie 2019-2020/cult3.xlsx")
-#outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/research/20200128plots/outpatient2020_01_25.csv")
+#outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/DataSets/Microbiome Brandie 2019-2020/outpatient2020_01_25.csv")
+#cult3 <- read_excel("D:/DataSets/Microbiome Brandie 2019-2020/cult3.xlsx")
+outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/research/20200128plots/outpatient2020_01_25.csv")
+cult3 <- read_excel("C:/Users/Casey/Desktop/research/cult3.xlsx")
 # age, gender, base fev1% (m r), fev1 pred(mr)
 # change pred fev (mr), v1 pes score, days between visit (mr)
 # ? genotyp, cf resp culture v1, positie viral pcr
