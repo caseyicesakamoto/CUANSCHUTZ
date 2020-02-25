@@ -13,7 +13,6 @@ library(tidyverse)
 library(tableone)
 library(readxl)
 library(knitr)
-library(kableExtra)
 outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/DataSets/Microbiome Brandie 2019-2020/outpatient2020_01_25.csv")
 cult3 <- read_excel("D:/DataSets/Microbiome Brandie 2019-2020/cult3.xlsx")
 #outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/research/20200128plots/outpatient2020_01_25.csv")
@@ -68,7 +67,6 @@ t1 = CreateTableOne(data = patient_t1_df, vars = all_var, factorVars = cat_vars)
 final = print(t1, nonnormal = med_iqr_vars, showAllLevels = TRUE, minMax = TRUE)
 
 #write.csv(final, "table1.csv")
-
 ```
 
 ```{r table1 kable, echo=FALSE}
