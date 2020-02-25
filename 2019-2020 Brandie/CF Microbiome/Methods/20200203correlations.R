@@ -51,7 +51,7 @@ cor(patient_df$load_dif, patient_df$change_fev_perc_v1v2, use = "complete.obs")
 FEV_cfu_cor = ggplot(data = patient_df) + 
   geom_point(aes(changeCFU,change_fev_perc_v1v2)) + theme_classic() +
   labs(title = "Percent Change in FEV1 (V1-V2) vs Change in Dominant Organism",
-       x = "Change in Log10 CFU of Dominant Bacteria", y = "%-Change in FEV1")
+       x = "Change in Log CFU of Dominant Bacteria", y = "%-Change in FEV1")
 print(FEV_cfu_cor)
 # 3 missing a v2
 # corr = -0.246
@@ -59,9 +59,9 @@ print(FEV_cfu_cor)
 cor(patient_df$changeCFU, patient_df$change_fev_perc_v1v2, use = "complete.obs")
 
 ####### save plots
-ggsave("20200204FEV_BD_corr.tiff", plot = FEV_BD_cor)
-ggsave("20200204FEV_load_corr.tiff", plot = FEV_load_cor)
-ggsave("20200204FEV_cfu_corr.tiff", plot = FEV_cfu_cor)
+ggsave("20200204FEV_BD_corr.tiff", plot = FEV_BD_cor, height = 12, width = 12)
+ggsave("20200204FEV_load_corr.tiff", plot = FEV_load_cor, height = 12, width = 12)
+ggsave("20200204FEV_cfu_corr.tiff", plot = FEV_cfu_cor, height = 12, width = 12)
 
 
 
