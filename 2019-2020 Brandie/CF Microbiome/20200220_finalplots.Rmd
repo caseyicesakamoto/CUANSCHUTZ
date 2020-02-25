@@ -136,13 +136,13 @@ ggsave("20200128_sbc_c5.tiff", plot = taxa_sbc_c5, height = 12, width = 12)
 ```{r spaghetti plots}
 ##### spaghetti plots #####
 library(data.table)
-sublist = c("BAM014", "BSN024", "ESP008", "MEB022", "NDR020", "SKH012", "VAC001", "VCR009", "A_MO25")
-long_op = outpatient_2vv %>% select(c("sid", "visit", "lq_all")) %>% filter(!(sid %in% sublist))
-wide_op = long_op %>% dcast(sid~visit, fun=mean) 
+long_op = outpatient2v %>% select(c("sid_new", "visit", "lq_all"))
+wide_op = long_op %>% dcast(sid_new~visit, fun=mean) 
 long_op = wide_op %>% gather(visit, lq_all, `1`:`2`)
 lq_all_noodle = ggplot(data = long_op, 
-                       aes(x = as.numeric(visit), y = lq_all, group = sid, label = sid)) + 
+                       aes(x = as.numeric(visit), y = 10^(lq_all), group = sid_new, label = sid_new)) + 
   geom_line() + 
+  scale_y_log10() +
   stat_summary(aes(group = 1), 
                geom = "line", fun.y = mean, color = "blue") 
 #geom_text(aes(label = sid), size = 2)
@@ -152,7 +152,7 @@ lq_all_noodle = lq_all_noodle + labs(title = "Change in Log Copies/Reaction With
 
 lq_all_noodle = lq_all_noodle  + geom_label_repel(point.padding = NA,
                                                   #direction = "y",
-                                                  size = 4)
+                                                  size = 2)
 #print(lq_all_noodle)
 ggsave("20200128_spaghetti_plot.tiff", plot = lq_all_noodle, height = 12, width = 12)
 ```
