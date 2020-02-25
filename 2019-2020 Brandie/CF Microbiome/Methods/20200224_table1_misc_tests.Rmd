@@ -2,7 +2,9 @@
 title: "20200224_Table1_Final"
 author: "Casey Sakamoto"
 date: "2/24/2020"
-output: pdf_document
+output:
+  word_document: default
+  pdf_document: default
 ---
 This is final version (instead of 20200101_table1.r)
 (i messed up on version control)

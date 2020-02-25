@@ -130,6 +130,7 @@ taxa_sbc_c5 = taxa_sbc_c5 +
                                  x = "Visit", 
                                  y = "Total Percent of Community")
 
+setwd("C:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome")
 ggsave("20200128_sbc_c5.tiff", plot = taxa_sbc_c5, height = 12, width = 12)
 ```
 
@@ -154,6 +155,7 @@ lq_all_noodle = lq_all_noodle  + geom_label_repel(point.padding = NA,
                                                   #direction = "y",
                                                   size = 2)
 #print(lq_all_noodle)
+setwd("C:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome")
 ggsave("20200128_spaghetti_plot.tiff", plot = lq_all_noodle, height = 12, width = 12)
 ```
 
