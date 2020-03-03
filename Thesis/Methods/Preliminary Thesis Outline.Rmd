@@ -4,27 +4,36 @@ author: "Casey Sakamoto"
 date: "3/3/2020"
 output: pdf_document
 ---
+# Latent Class Model in the Airway Microbiome
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+## Introduction
 
-## R Markdown
+The application of latent class analysis to the microbiome is still relatively novel; not a lot of recent application, especially incorporating mixed components, to airways. 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+I am interested in the similarities in phenotypes during a pulmonary exacerbation (PEx) in children. Our data are swabs on ~200 infants who were followed over several years (> 5 time points) with a relatively low # of taxa (could categorize into 4 groups), and demographic, clinical, etc. also recorded.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Specifically, my main questions are:
 
-```{r cars}
-summary(cars)
-```
+(1) how many latent classes are there/can we build these classes using covariates?
 
-## Including Plots
+- In parent publication there were 4 clusters from random forest
 
-You can also embed plots, for example:
+(2) When we build these classes what covariates are associated with our clusters?
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+## Methods 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+I am looking to build a multivariate latent class mixed model, which can adjust for fixed effects and random effects due to within-subject correlation to identify phenotypes (# latent classes).
+
+I will need to decide before fitting the model which covariates I will include, and what kind of random effects to include.
+
+In order to fit this model, we need our outcomes to be normalized. For compositional data, two common transformations are the centered logratio transformation and the isometric logratio transformation. While the CLR transformation is more simple to compute and interpret, the resulting parts sums to 0, which may lead to singularity issues in model fitting. Because of this the ILR (which does not run into singularity issues at the cost of interpretabilty) will be used. 
+
+
+
+### Highlighted articles using latent class models
+
+Sundarensan (2018) - used to get a population prevalence of a disease
+
+Bacharier (2019) - phenotypes & mixed models with trajectories for airways in children
+
+Eun Lee (2017) - identified phenotypes in children
