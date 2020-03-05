@@ -8,9 +8,27 @@ output: pdf_document
 
 ## Introduction
 
+### Cf relevance- why do we care about CF & lungs - in kids
+
+Cf is most common life-threatening autosomal recessive disease in US (1 in 4000 newborns in US, higher in some european countries) Farrell 2017
+
+CF pulmonary disease begins early, and can progreess rapidly without early identification. (goetz 2019) 
+
+Identifying phenotypes based on airway microbiome community composition may help us specialize treatment for patients with these distinct phenotypes
+
+### Motivating example
+
+BONUS study 
+
+### intro to the method to be used
+
 The application of latent class analysis to the microbiome is still relatively novel; not a lot of recent application, especially incorporating mixed components, to airways. 
 
 I am interested in the similarities in phenotypes during a pulmonary exacerbation (PEx) in children. Our data are swabs on ~200 infants who were followed over several years (> 5 time points) with a relatively low # of taxa (could categorize into 4 groups), and demographic, clinical, etc. also recorded.
+
+### why we chose thisparticular nethod
+
+## Thesis Questions 
 
 Specifically, my main questions are:
 
@@ -37,3 +55,11 @@ Sundarensan (2018) - used to get a population prevalence of a disease
 Bacharier (2019) - phenotypes & mixed models with trajectories for airways in children
 
 Eun Lee (2017) - identified phenotypes in children
+
+### other sources
+
+Pulmonary findings in infants with cystic fibrosis during the first year of life: results from the Baby Observational and Nutrition Study (BONUS) cohort study. Goetz D 2019 - data set for our paper
+
+Diagnosis of Cystic Fibrosis: Consensus Guidelines from the Cystic Fibrosis Foundation (2017) - background on cf
+
+Characteristics and outcomes of oral antibiotic treated pulmonary exacerbations in children with cystic fibrosis Farrell (2018) - background
