@@ -8,53 +8,96 @@ output: pdf_document
 
 ## Introduction
 
-### Cf relevance- why do we care about CF & lungs - in kids
+### Cf relevance
 
-Cf is most common life-threatening autosomal recessive disease in US (1 in 4000 newborns in US, higher in some european countries) Farrell 2017
+Cf is most common life-threatening autosomal recessive disease in US, affecting 1 in 4000 newborns in US, and a higher rate in some european countries (Farrell 2017)
 
 CF pulmonary disease begins early, and can progreess rapidly without early identification. (goetz 2019) 
 
-Identifying phenotypes based on airway microbiome community composition may help us specialize treatment for patients with these distinct phenotypes
+CF leads to airways vulnerable to chronic bacterial infections, requiring repeated hospital visits, IV antibiotics, and additional care (CF org)
 
-### Motivating example
+It is therefore important to understand the microbiome of airways within CF patients so that we can create treatment plans for patients with different airway bacterial communities.
 
-BONUS study 
+Furthermore, identifying phenotypes based on airway microbiome community composition may help us specialize treatment for patients with these distinct phenotypes. 
 
-### intro to the method to be used
+Currently, multiple ways to cluster and build these phenotypes (see highlighted articles section), and it is difficult to methods/truth
+
+### Motivating example [BONUS study]
+
+(Goetz 2019) analyzed data from the Baby Observational and Nutritional Study (BONUS): 28 centers in US which has clinical, medication, symptomes, culture, and chest radiographs data collected repeatedly throughout the first year of life ($n\approx 200$; around 4-6 samples/subj; 1053 samples total) 
+
+time measured in age (months) both continuous and "rounded" (if there was a patient with month 4.7 and 5.4, these months were rounded to 5 and 6)
+
+194 infants (84%) developed a CF specific pathogen
+
+relatively low # of taxa (could categorize into groups) 
+
+### Why i am looking at latent class analysis
 
 The application of latent class analysis to the microbiome is still relatively novel; not a lot of recent application, especially incorporating mixed components, to airways. 
 
-I am interested in the similarities in phenotypes during a pulmonary exacerbation (PEx) in children. Our data are swabs on ~200 infants who were followed over several years (> 5 time points) with a relatively low # of taxa (could categorize into 4 groups), and demographic, clinical, etc. also recorded.
+Several papers have emphasized the utility of building latent variable models in the context of examining the true bacterial composition of a sample (Wu, Berkow 2013; daSilvaSolca 2014; J Fu 2015; Sundarenson 2018). 
 
-### why we chose thisparticular nethod
+(Wu,Berkow 2013) mentions that RMANOVA special, more constrained case of LV SEM and that LV models more flexible, better fit
+
+Several studies used a similar method using Bayesian LV models to get around normality assumption
 
 ## Thesis Questions 
 
+I am interested in the similarities in phenotypes during a pulmonary exacerbation (PEx) in children. 
+
 Specifically, my main questions are:
 
-(1) how many latent classes are there/can we build these classes using covariates?
+(1) how many latent classes are there/can we build these classes using LC analysis?
 
-- In parent publication there were 4 clusters from random forest
+- In Brandie's work there were 4 clusters from random forest -- point of reference
 
 (2) When we build these classes what covariates are associated with our clusters?
 
+- Start with just age
+
+(3) [Optional] How does the Latent Class model compare with 2-stage models
+
+- If clinical findings for (1) and (2) not interesting
+
 ## Methods 
 
-I am looking to build a multivariate latent class mixed model, which can adjust for fixed effects and random effects due to within-subject correlation to identify phenotypes (# latent classes).
+I am looking to build a multivariate latent class mixed model, which can adjust for fixed effects and random effects due to within-subject correlation to identify phenotypes (# latent classes). 
+
+### Latent Class Linear Mixed Model (Proust 2017)
+
+Assume a heterogenous population with $G$ latent classes of subjects, where each subject belongs to one class. Then $C_i$ is a discrete random variable that equals $g$ when subject i belongs to latent class $g$. For a Normal outcome $Y_{ij}$ in class $g$, the linear mixed model is:
+
+$Y_{ij|c_i=g} = X(t_{ij})^T \beta + Z_i(t_{ij})^T u_{ig} + w_{i}(t_{ij}) + \epsilon_{ij}$,
+
+Where X are fixed effects (can be split into common and class-specific), Z are individual random effects, w is a normal autocorrelation process, and $\epsilon$ is random noise.
+
+The linear mixed model is extended to a latent process model,
+
+$\Lambda_{ij|c_i=g} = X(t_{ij})^T \beta + Z_i(t_{ij})^T u_{ig} + w_{i}(t_{ij})$
+
+note: distribution of u is class specific $u_{ij} \sim MVN(0, \omega_g^2 B)$ where B is an unspecified VCOV matrix. and w is a class-specific coefficient to allow class-specific individual variability
+
+this model assumes the population heterogeneity only affects the underlying latent process of interest
+
+the parameters to be estimated: Fixed effects, Random effects, variance of w, variance of the errors, parameters for beta transformation (link for outcome to latent process, p(c = g), w)( quite a few parameters).
 
 I will need to decide before fitting the model which covariates I will include, and what kind of random effects to include.
+
+For primary models, we will fit only using age to see if we can build classes with the model.
 
 In order to fit this model, we need our outcomes to be normalized. For compositional data, two common transformations are the centered logratio transformation and the isometric logratio transformation. While the CLR transformation is more simple to compute and interpret, the resulting parts sums to 0, which may lead to singularity issues in model fitting. Because of this the ILR (which does not run into singularity issues at the cost of interpretabilty) will be used. 
 
 
-
 ### Highlighted articles using latent class models
-
-Sundarensan (2018) - used to get a population prevalence of a disease
 
 Bacharier (2019) - phenotypes & mixed models with trajectories for airways in children
 
 Eun Lee (2017) - identified phenotypes in children
+
+L Xu (2017) - bayesian LV model to jointly model mult phenotypes in longitudinal family studies
+
+JS Son (2015) - looked at lv SEM in fecal microbiome in children with ASD, built classes
 
 ### other sources
 
@@ -63,3 +106,5 @@ Pulmonary findings in infants with cystic fibrosis during the first year of life
 Diagnosis of Cystic Fibrosis: Consensus Guidelines from the Cystic Fibrosis Foundation (2017) - background on cf
 
 Characteristics and outcomes of oral antibiotic treated pulmonary exacerbations in children with cystic fibrosis Farrell (2018) - background
+
+https://www.cysticfibrosis.org.uk/what-is-cystic-fibrosis/how-does-cystic-fibrosis-affect-the-body/symptoms-of-cystic-fibrosis/lungs - background on cf
