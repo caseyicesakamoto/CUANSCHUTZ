@@ -156,5 +156,12 @@ lq_all_noodle = lq_all_noodle  + geom_label_repel(point.padding = NA,
 #print(lq_all_noodle)
 setwd("C:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome")
 ggsave("20200128_spaghetti_plot.tiff", plot = lq_all_noodle, height = 12, width = 12)
+
+## TBL differences
+wide_op = wide_op %>% mutate(load_diff = wide_op$`2` - wide_op$`1`)
+
+wide_op %>% filter(load_diff > 0.5) %>% count() # 6 > 0.5
+wide_op %>% filter(load_diff < -0.5) %>% count() # 5 < -0.5
+wide_op %>% filter(abs(load_diff) < 0.5) %>% count()
 ```
 
