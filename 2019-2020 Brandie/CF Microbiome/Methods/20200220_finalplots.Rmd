@@ -14,7 +14,6 @@ outpatient2v <- read.csv("C:/Users/Casey/Desktop/research/outpatient_2vis.csv")
 outpatient2v = outpatient2v %>% select(-X)
 # load in MH diversity matrix
 Outpatient_MH<- read.delim("C:/Users/Casey/Desktop/research/OutpatientAbx_Morisita-Horn_Morisita-Horn.txt")
-
 ```
 
 ```{r data clean}
