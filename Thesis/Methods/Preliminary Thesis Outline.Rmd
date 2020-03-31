@@ -22,6 +22,10 @@ Furthermore, identifying phenotypes based on airway microbiome community composi
 
 Currently, multiple ways to cluster and build these phenotypes (see highlighted articles section), and it is difficult to methods/truth
 
+### Microbiome background
+
+
+
 ### Motivating example [BONUS study]
 
 (Goetz 2019) analyzed data from the Baby Observational and Nutritional Study (BONUS): 28 centers in US which has clinical, medication, symptomes, culture, and chest radiographs data collected repeatedly throughout the first year of life ($n\approx 200$; around 4-6 samples/subj; 1053 samples total) 
@@ -64,11 +68,40 @@ Specifically, my main questions are:
 
 I am looking to build a multivariate latent class mixed model, which can adjust for fixed effects and random effects due to within-subject correlation to identify phenotypes (# latent classes). 
 
-### Latent Class Linear Mixed Model (Proust 2017)
+### Building a Latent Class Linear Mixed Model (Proust 2017)
+#### LMM recap
+Recall that for a sample of $n$ subjects with $r_i$ repeated measures $Y_{ij}$, the outcome value for subject $i$ at the $rth$ measurement at time $t_{ij}$, the linear mixed model is as follows:
+
+$Y_{ij} = X(t_{ij})^T \beta + Z_i(t_{ij})^T b_{i} + w_{i}(t_{ij}) + \epsilon_{ij}$,
+
+Where $\beta$ is our vector of fixed effects and $b$ is our vector of random effects. Trajectory shapes in $X$ and $Z$ can be "of any type such as polynomial, specifically designed to fit, or approximated using basis of I-Splines." 
+
+The random effects vector $b_i$ has a zero-mean MVN distribution with unspecified covariance structure. Measurement errors $\epsilon_{ij}$ are independent Normal errors with variance $\sigma^2_\epsilon$. The process $w_{i}(t)$ is a zero-mean Gaussian stochastic process or a stationary process with parameter $\sigma^2_w$(note: this is included in semiparametric lmm, not regular parametric lmm from BIOS6643, and is used to model serial correlation)
+
+In the LMM, we assume Normally distributed deviations (measurement errors, random effects, correlated errors) and constant covariate effects across time. However, these assumptions do not hold for many outcomes, especially in the microbiome where an outcome is a count.
+
+# include what is a latent variable section here?
+#### Latent Process Mixed Model
+
+Thus, Proust defines a family of models, the "latent process mixed models" as "separating the structural model that describes the quantity of interest (latent process) according to time and covariates from the measurement model that links the quantity of interest to the observations."
+
+Define the latent process $\Lambda_i(t)$ as a standard linear mixed model without measurement error:
+
+$\Lambda_i(t) = X(t_{ij})^T \beta + Z_i(t_{ij})^T b_{i} + w_{i}(t_{ij})$
+
+In order to account for different types of longitudinal markers (nonnormal), a link function $H$ between the latent process $\Lambda_i(t_{ij})$ and the outcome $Y_{ij}$ at time $t_{ij}$:
+
+$Y_{ij} = H(\Lambda_i(t_{ij}) + \epsilon_{ij} |\eta) $
+
+Where $\eta$ are the parameters to the link function which transforms outcomes to Normally distributed to fit framework of standard LMM.
+
+in package: linear transformation to gaussian framework, rescale Y to (0,1) and use beta CDF, basis of quadratic I-splines
+
+The latent process mixed model constrains the location of $\beta_0 = 0$ and the scale $\sigma^2_\epsilon =1$
 
 Assume a heterogenous population with $G$ latent classes of subjects, where each subject belongs to one class. Then $C_i$ is a discrete random variable that equals $g$ when subject i belongs to latent class $g$. For a Normal outcome $Y_{ij}$ in class $g$, the linear mixed model is:
 
-$Y_{ij|c_i=g} = X(t_{ij})^T \beta + Z_i(t_{ij})^T u_{ig} + w_{i}(t_{ij}) + \epsilon_{ij}$,
+$Y_{ij|c_i=g} = X(t_{ij})^T \beta + Z_i(t_{ij})^T b_{ig} + w_{i}(t_{ij}) + \epsilon_{ij}$,
 
 Where X are fixed effects (can be split into common and class-specific), Z are individual random effects, w is a normal autocorrelation process, and $\epsilon$ is random noise.
 
