@@ -91,13 +91,17 @@ $\Lambda_i(t) = X(t_{ij})^T \beta + Z_i(t_{ij})^T b_{i} + w_{i}(t_{ij})$
 
 In order to account for different types of longitudinal markers (nonnormal), a link function $H$ between the latent process $\Lambda_i(t_{ij})$ and the outcome $Y_{ij}$ at time $t_{ij}$:
 
-$Y_{ij} = H(\Lambda_i(t_{ij}) + \epsilon_{ij} |\eta) $
+$Y_{ij} = H(\Lambda_i(t_{ij}) + \epsilon_{ij} |\eta)$
 
 Where $\eta$ are the parameters to the link function which transforms outcomes to Normally distributed to fit framework of standard LMM.
 
 in package: linear transformation to gaussian framework, rescale Y to (0,1) and use beta CDF, basis of quadratic I-splines
 
 The latent process mixed model constrains the location of $\beta_0 = 0$ and the scale $\sigma^2_\epsilon =1$
+
+#### latent process mixed model for multivariate longitudinal markers
+
+The previous model extends to the multivariate case where multiple longitudinal markers (eg. different bacteria taxa), and the latent process is the common factor underlying the markers.
 
 Assume a heterogenous population with $G$ latent classes of subjects, where each subject belongs to one class. Then $C_i$ is a discrete random variable that equals $g$ when subject i belongs to latent class $g$. For a Normal outcome $Y_{ij}$ in class $g$, the linear mixed model is:
 
@@ -109,7 +113,7 @@ The linear mixed model is extended to a latent process model,
 
 $\Lambda_{ij|c_i=g} = X(t_{ij})^T \beta + Z_i(t_{ij})^T u_{ig} + w_{i}(t_{ij})$
 
-note: distribution of u is class specific $u_{ij} \sim MVN(0, \omega_g^2 B)$ where B is an unspecified VCOV matrix. and w is a class-specific coefficient to allow class-specific individual variability
+The distribution of u is class specific $u_{ij} \sim MVN(0, \omega_g^2 B)$ where B is an unspecified VCOV matrix. and w is a class-specific coefficient to allow class-specific individual variability
 
 this model assumes the population heterogeneity only affects the underlying latent process of interest
 
