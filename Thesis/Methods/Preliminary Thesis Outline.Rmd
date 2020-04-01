@@ -101,15 +101,27 @@ The latent process mixed model constrains the location of $\beta_0 = 0$ and the 
 
 #### latent process mixed model for multivariate longitudinal markers
 
-The previous model extends to the multivariate case where multiple longitudinal markers (eg. different bacteria taxa), and the latent process is the common factor underlying the markers.
+The previous model extends to the multivariate case involving multiple longitudinal markers (eg. different bacteria taxa), and the latent process is the common factor underlying the markers.
 
-Assume a heterogenous population with $G$ latent classes of subjects, where each subject belongs to one class. Then $C_i$ is a discrete random variable that equals $g$ when subject i belongs to latent class $g$. For a Normal outcome $Y_{ij}$ in class $g$, the linear mixed model is:
+In this case, we can include covariates with marker-specific effects called contrasts (sum of coefficients = 0)
+
+Each marker relationship with underlying quantity of interest is modeled through its own link function $H_k$ similar to previous section.
+
+similar constraints to previous section; although this also requires a random intercept, and no mean intercept is allowed in the structural model.
+
+### Latent Class Mixed Models
+
+Assume a heterogenous population with $G$ latent classes of subjects, where each subject belongs to one class. Then $C_i$ is a discrete random variable that equals $g$ when subject i belongs to latent class $g$. 
+
+the probability of $C_i = g$ is a class-specific probability, but can also be described using a multinomial logistic regression model with me-independent covariates $X_{c_i}$
+
+For a Normal outcome $Y_{ij}$ in class $g$, the linear mixed model is:
 
 $Y_{ij|c_i=g} = X(t_{ij})^T \beta + Z_i(t_{ij})^T b_{ig} + w_{i}(t_{ij}) + \epsilon_{ij}$,
 
 Where X are fixed effects (can be split into common and class-specific), Z are individual random effects, w is a normal autocorrelation process, and $\epsilon$ is random noise.
 
-The linear mixed model is extended to a latent process model,
+extended to a latent process model:
 
 $\Lambda_{ij|c_i=g} = X(t_{ij})^T \beta + Z_i(t_{ij})^T u_{ig} + w_{i}(t_{ij})$
 
@@ -118,6 +130,10 @@ The distribution of u is class specific $u_{ij} \sim MVN(0, \omega_g^2 B)$ where
 this model assumes the population heterogeneity only affects the underlying latent process of interest
 
 the parameters to be estimated: Fixed effects, Random effects, variance of w, variance of the errors, parameters for beta transformation (link for outcome to latent process, p(c = g), w)( quite a few parameters).
+
+### Estimation of parameters and likelihoods
+
+
 
 I will need to decide before fitting the model which covariates I will include, and what kind of random effects to include.
 
