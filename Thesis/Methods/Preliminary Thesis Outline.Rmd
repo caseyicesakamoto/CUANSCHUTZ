@@ -133,7 +133,11 @@ the parameters to be estimated: Fixed effects, Random effects, variance of w, va
 
 ### Estimation of parameters and likelihoods
 
+The individual contribution to the likelihood of a lcmm is:
 
+$L_i(\theta_G) = \sum^G_{g = 1}Pr(c_i = g)\phi_{ig}(Y_i|c_i =g ; \theta_G)$
+
+Where $C$ is a random variable that equals $g$ when the subject belongs to latent class $g$, and $\phi_{ig} \sim MVN(X(t_{ij})^T\beta, Z_iBZ_i^T + R_i)$
 
 I will need to decide before fitting the model which covariates I will include, and what kind of random effects to include.
 
