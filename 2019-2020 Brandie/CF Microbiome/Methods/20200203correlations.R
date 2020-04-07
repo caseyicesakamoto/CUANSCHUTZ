@@ -7,7 +7,7 @@ library(ggplot2)
 library(ggrepel)
 library(vegan)
 library(readxl)
-cult3 <- read_excel("C:/Users/Casey/Desktop/research/cult3.xlsx")
+cult3 <- read_excel("C:/Users/Casey/Desktop/research/cult3.xlsx") # laptop
 patient_t1_df <- read.csv("C:/Users/Casey/Desktop/research/patient_t1_df.csv")
 MH_subj <- read.csv("C:/Users/Casey/Desktop/research/MH_subj.csv")
 outpatient_2vis <- read.csv("C:/Users/Casey/Desktop/research/outpatient_2vis.csv")

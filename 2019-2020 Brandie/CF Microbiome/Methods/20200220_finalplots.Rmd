@@ -10,10 +10,12 @@ library(ggplot2)
 library(ggrepel)
 library(vegan)
 # load in cleaned data
-outpatient2v <- read.csv("C:/Users/Casey/Desktop/research/outpatient_2vis.csv")
+# outpatient2v <- read.csv("C:/Users/Casey/Desktop/research/outpatient_2vis.csv") #laptop
+outpatient2v <- read.csv("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020/outpatient_2vis.csv") #desktop
 outpatient2v = outpatient2v %>% select(-X)
 # load in MH diversity matrix
-Outpatient_MH<- read.delim("C:/Users/Casey/Desktop/research/OutpatientAbx_Morisita-Horn_Morisita-Horn.txt")
+# Outpatient_MH<- read.delim("C:/Users/Casey/Desktop/research/OutpatientAbx_Morisita-Horn_Morisita-Horn.txt") #laptop
+Outpatient_MH<- read.delim("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020/OutpatientAbx_Morisita-Horn_Morisita-Horn.txt") #desktop
 ```
 
 ```{r data clean}
