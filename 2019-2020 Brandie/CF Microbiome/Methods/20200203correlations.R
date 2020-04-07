@@ -27,6 +27,14 @@ patient_df = full_join(patient_load, patient_df, by="sid")
 patient_df = full_join(patient_df, cult3, by="sid")
 rm(MH_subj,patient_t1_df,patient_load, cult3)
 #####---------------#######
+
+###### change in MH vs change in load ######
+MH_load_cor = ggplot(data = patient_df) + 
+  geom_point(aes(MH_BD, load_dif)) + theme_classic() + 
+  labs(title = "Log-Change in Load vs MH Beta Diversity", x = "MHBD", y = "log change in load")
+print(MH_load_cor)
+##### ============================
+
 ###### Change in FEV vs change in MH #####
 FEV_BD_cor = ggplot(data = patient_df) + 
   geom_point(aes(MH_BD,change_fev_perc_v1v2)) + theme_classic() + 
@@ -62,7 +70,7 @@ cor(patient_df$changeCFU, patient_df$change_fev_perc_v1v2, use = "complete.obs",
 ggsave("20200204FEV_BD_corr.tiff", plot = FEV_BD_cor, height = 12, width = 12)
 ggsave("20200204FEV_load_corr.tiff", plot = FEV_load_cor, height = 12, width = 12)
 ggsave("20200204FEV_cfu_corr.tiff", plot = FEV_cfu_cor, height = 12, width = 12)
-
+ggsave("20200204BD_load_corr.tiff", plot = MH_load_cor, height = 12, width = 12)
 
 
 ##### alpha diversity #####

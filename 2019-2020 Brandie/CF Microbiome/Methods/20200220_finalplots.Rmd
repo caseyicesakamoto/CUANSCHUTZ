@@ -10,18 +10,15 @@ library(ggplot2)
 library(ggrepel)
 library(vegan)
 # load in cleaned data
-# outpatient2v <- read.csv("C:/Users/Casey/Desktop/research/outpatient_2vis.csv") #laptop
-outpatient2v <- read.csv("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020/outpatient_2vis.csv") #desktop
+outpatient2v <- read.csv("C:/Users/Casey/Desktop/research/outpatient_2vis.csv") #laptop
+#outpatient2v <- read.csv("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020/outpatient_2vis.csv") #desktop
 outpatient2v = outpatient2v %>% select(-X)
 # load in MH diversity matrix
-# Outpatient_MH<- read.delim("C:/Users/Casey/Desktop/research/OutpatientAbx_Morisita-Horn_Morisita-Horn.txt") #laptop
-Outpatient_MH<- read.delim("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020/OutpatientAbx_Morisita-Horn_Morisita-Horn.txt") #desktop
+Outpatient_MH<- read.delim("C:/Users/Casey/Desktop/research/OutpatientAbx_Morisita-Horn_Morisita-Horn.txt") #laptop
+#Outpatient_MH<- read.delim("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020/OutpatientAbx_Morisita-Horn_Morisita-Horn.txt") #desktop
 ```
 
 ```{r data clean}
-##### mh barchart #####
-# load in cleaned data
-
 # -------------------------------------------------------------------------
 ##### Data Cleaning #####
 # get a reference for "name" and "sid"
@@ -154,7 +151,7 @@ lq_all_noodle = lq_all_noodle + labs(title = "Change in Log Copies/Reaction With
 
 lq_all_noodle = lq_all_noodle  + geom_label_repel(point.padding = NA,
                                                   #direction = "y",
-                                                  size = 2)
+                                                  size = 3)
 #print(lq_all_noodle)
 setwd("C:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome")
 ggsave("20200128_spaghetti_plot.tiff", plot = lq_all_noodle, height = 12, width = 12)
