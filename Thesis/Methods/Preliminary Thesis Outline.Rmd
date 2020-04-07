@@ -68,7 +68,16 @@ Specifically, my main questions are:
 
 I am looking to build a multivariate latent class mixed model, which can adjust for fixed effects and random effects due to within-subject correlation to identify phenotypes (# latent classes). 
 
-### Building a Latent Class Linear Mixed Model (Proust 2017)
+### Building a Latent Class Linear Mixed Model (Proust 2017 for all math sections)
+
+#### What is a Latent Variable? (bollen 2002)
+
+A latent variable is a variable for which there is no sample realization for at least some (sometimes all) observations in a given sample
+
+With regular observed random variables, a sample will contain realizations.
+
+For example, Wu, Berkow (2013) defines the latent variable as the true frequency of a specific type of bacteria in a microbiome community. 
+
 #### LMM recap
 Recall that for a sample of $n$ subjects with $r_i$ repeated measures $Y_{ij}$, the outcome value for subject $i$ at the $rth$ measurement at time $t_{ij}$, the linear mixed model is as follows:
 
@@ -80,7 +89,6 @@ The random effects vector $b_i$ has a zero-mean MVN distribution with unspecifie
 
 In the LMM, we assume Normally distributed deviations (measurement errors, random effects, correlated errors) and constant covariate effects across time. However, these assumptions do not hold for many outcomes, especially in the microbiome where an outcome is a count.
 
-# include what is a latent variable section here?
 #### Latent Process Mixed Model
 
 Thus, Proust defines a family of models, the "latent process mixed models" as "separating the structural model that describes the quantity of interest (latent process) according to time and covariates from the measurement model that links the quantity of interest to the observations."
@@ -125,7 +133,7 @@ extended to a latent process model:
 
 $\Lambda_{ij|c_i=g} = X(t_{ij})^T \beta + Z_i(t_{ij})^T u_{ig} + w_{i}(t_{ij})$
 
-The distribution of u is class specific $u_{ij} \sim MVN(0, \omega_g^2 B)$ where B is an unspecified VCOV matrix. and w is a class-specific coefficient to allow class-specific individual variability
+The distribution of u is class specific $u_{ij} \sim N(0, \omega_g^2 B)$ where B is an unspecified VCOV matrix. and w is a class-specific coefficient to allow class-specific individual variability
 
 this model assumes the population heterogeneity only affects the underlying latent process of interest
 
@@ -137,7 +145,23 @@ The individual contribution to the likelihood of a lcmm is:
 
 $L_i(\theta_G) = \sum^G_{g = 1}Pr(c_i = g)\phi_{ig}(Y_i|c_i =g ; \theta_G)$
 
-Where $C$ is a random variable that equals $g$ when the subject belongs to latent class $g$, and $\phi_{ig} \sim MVN(X(t_{ij})^T\beta, Z_iBZ_i^T + R_i)$
+Where $C$ is a random variable that equals $g$ when the subject belongs to latent class $g$, and $\phi_{ig} \sim N(X(t_{ij})^T\beta, Z_iBZ_i^T + R_i + \Sigma_i)$
+
+A subject's individual contribution is obtained by replacing $\phi_{ig}$ with the appropriate parameters.
+
+In the lcmm package, an extended Marquadt algorithm (Newton-Raphson family) will be used to maximize the log-likelihood.
+
+The algorithm works by updating the vector of parameters until convergence using the following:
+
+note: $l$ denotes iteration
+
+$\theta_g^{(l+1)} = \theta_g^{(l)} - \delta(\tilde{\mathcal{H}}^{(l)})^{-1}\nabla(L(\theta_g^{(l)}))$
+
+Where $\tilde{\mathcal{H}}$ is a diagonal-inflated Hessian (helps ensure positive definiteness) and $\nabla(L(\theta_g^{(l)}))$ is the gradient of the log-likelihood at the $l$th iteration.
+
+Convergence of the log-likelihood is based on parameter stability, log-likelihood stability, and the size of the derivatives. All three must satisfy convergence criteria (threshold which is default $10^{-4}$). Having multiple criteria is important beccause the shape of the log-likelihood in lcmm can be relatively flat in areas of the parameter space.
+
+## Proposed Implementation
 
 I will need to decide before fitting the model which covariates I will include, and what kind of random effects to include.
 
