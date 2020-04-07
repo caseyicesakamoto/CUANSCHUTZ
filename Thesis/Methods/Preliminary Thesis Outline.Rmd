@@ -76,7 +76,11 @@ A latent variable is a variable for which there is no sample realization for at 
 
 With regular observed random variables, a sample will contain realizations.
 
-For example, Wu, Berkow (2013) defines the latent variable as the true frequency of a specific type of bacteria in a microbiome community. 
+For example, we can't measure self-esteem (latent), but we can use the compiled answers on a questionnaire (observed r.v.) to glean information about it
+
+Wu, Berkow (2013) defines a latent variable as the true bacterial composition in a sample. However, several measurement platforms are used to measure this composition. Latent variable analysis used to identify the most reliable measurement platform.
+
+# insert image of basic latentt variable model (like wu berkow 2013)
 
 #### LMM recap
 Recall that for a sample of $n$ subjects with $r_i$ repeated measures $Y_{ij}$, the outcome value for subject $i$ at the $rth$ measurement at time $t_{ij}$, the linear mixed model is as follows:
