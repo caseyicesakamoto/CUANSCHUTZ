@@ -5,8 +5,11 @@ library(ggrepel)
 library(vegan)
 # setwd("C:/Users/Casey/Desktop/research") for laptop
 # outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/research/20200128plots/outpatient2020_01_25.csv")
+# desktop
+outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020/outpatient2020_01_25.csv")
 outpatient_main = outpatient2020_01_25 %>% 
-  select(sid, perc_total, last, visit, lq_all,pcr_neg, seq_count, name)%>%
+  select(sid, perc_total, last, visit, lq_all,pcr_neg, seq_count, name, Antibiotic_class,
+         elas, IL1B, IL8, HMGB_1, Cell_Counts_x_104, X_Neutrophils___) %>%
   filter(!(sid == "JAR018" | sid == "BAR019" | sid == "NAO032" | sid == "EIL010" ))
 
 
@@ -23,7 +26,7 @@ outpatient_2vv = outpatient_2vv %>%  filter(!(
     sid=="NDR020"|sid=="SKH012"|sid=="VCR009"|sid=="VAC001"|sid=="A_MO25"))
 
 # for use in correlations dataset
-# setwd("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020")# for desktop
+setwd("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020")# for desktop
 write.csv(outpatient_2vv, "outpatient_2vis.csv")
 # ============================================== #
 

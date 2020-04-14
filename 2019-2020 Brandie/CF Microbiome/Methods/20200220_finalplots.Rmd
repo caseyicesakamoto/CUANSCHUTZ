@@ -78,10 +78,10 @@ firstpart = function(string_vector){
 }
 # final dataframe for boxplot
 MH_subj = MH_subj %>% mutate(sid = firstpart(Subject)) %>% rename("MH_BD"=`MH-BD`)%>% select(sid,MH_BD)
-# new sid (MH, viral) MH_subj
-name_df = outpatient2v %>% filter(visit==1)%>%select(sid, pcr_neg) %>% unique.data.frame()
+# new sid (MH, viral, antibiotc) MH_subj
+name_df = outpatient2v %>% filter(visit==1)%>%select(sid, pcr_neg, Antibiotic_class) %>% unique.data.frame()
 name_df = full_join(name_df, MH_subj, by = "sid")
-name_df = name_df %>% mutate(sid_new = paste0(MH_BD,"_",pcr_neg))
+name_df = name_df %>% mutate(sid_new = paste(MH_BD,pcr_neg,substr(Antibiotic_class,1,1),sep = "_"))
 name_df = name_df %>% select(sid, sid_new)
 MH_subj = full_join(MH_subj, name_df, by = "sid")
 outpatient2v = full_join(outpatient2v, name_df, by= "sid")
@@ -107,7 +107,7 @@ outer_quart = MH_box + geom_label_repel(data = subset(MH_subj,!between(MH_BD,qua
 lower_quart = MH_box + geom_label_repel(data = subset(MH_subj, MH_BD < quantile(MH_BD, .25)),
                                         direction = "x")+theme_classic()
 # save plots
-setwd("C:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome")
+setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
 ggsave("MH_outer_qtls.tiff", plot = outer_quart, dpi = 300)
 ```
 
@@ -131,7 +131,7 @@ taxa_sbc_c5 = taxa_sbc_c5 +
                                  x = "Visit", 
                                  y = "Total Percent of Community")
 
-setwd("C:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome")
+setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
 ggsave("20200128_sbc_c5.tiff", plot = taxa_sbc_c5, height = 12, width = 12)
 ```
 
@@ -156,7 +156,7 @@ lq_all_noodle = lq_all_noodle  + geom_label_repel(point.padding = NA,
                                                   #direction = "y",
                                                   size = 2)
 #print(lq_all_noodle)
-setwd("C:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome")
+setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
 ggsave("20200128_spaghetti_plot.tiff", plot = lq_all_noodle, height = 12, width = 12)
 
 ## TBL differences
