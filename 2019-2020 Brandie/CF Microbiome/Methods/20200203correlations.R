@@ -72,3 +72,13 @@ shm = outpatient2020_01_25 %>% select(visit,sid, ShannonH_Median, ShannonH_Mean)
   filter(!(sid %in% sublist)&visit==1)%>% unique.data.frame()%>%na.omit()
 # similar enough
 fivenum(shm$ShannonH_Median);fivenum(shm$ShannonH_Mean)
+
+###### corrs for inflammatory markers ####
+outpatient_2vis <- read.csv("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020/outpatient_2vis.csv")
+sublist = c("BAM014", "BSN024", "ESP008", "MEB022", "NDR020", "SKH012", 
+            "VAC001", "VCR009", "A_MO25", "JAR018", "BAR019", "NAO032", "EIL010")
+outpatient_2vis = outpatient_2vis %>% select(lq_all, sid, visit, elas, IL1B, IL8, HMGB_1,
+                                             Cell_Counts_x_104,X_Neutrophils___) %>%
+  filter(!(sid %in% sublist))%>% unique.data.frame()
+patient_load = outpatient_2vis %>% spread(visit, lq_all) %>%
+  mutate(load_dif = `2`-`1`) %>% select(-`1`,-`2`)
