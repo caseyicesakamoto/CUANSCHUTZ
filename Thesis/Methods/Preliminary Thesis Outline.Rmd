@@ -24,7 +24,28 @@ Furthermore, identifying phenotypes based on airway microbiome community composi
 
 Currently, multiple ways to cluster and build these phenotypes (see highlighted articles section), and it is difficult to methods/truth
 
-### Microbiome background
+### Microbiome background 
+#### Turnbaugh 2007
+
+The microorganisms living inside/on humans outnumber human somatic and germ cells (body/reproductive) tenfold
+
+The microbiome provides traits to the human system that humans did not need to evolve on their own (i really like figure 1 in this paper)
+
+We can use the microbiome to identify key differences between members of a family, community, or across different environments
+
+Microbiome data is important; to answer any scientific question, we need sample data, and scales(temporal: interval between measurements, spatial: where are we measuring, and how difficult is it to "randomly sample" the system[depending on what organ it could be from micrometers to meters], what populations are we interested in)
+
+#### analysis of composition of microbiomes mandal 2015
+
+Sequencing of a specimen (such as a sputum sample) provides an estimate of the abundance of different OTU's (operational taxonomic units; clustered microbial sequences clustered by sequencce similarity)
+
+Important to mention this is an estimate and not a true abundance; the lack of precision leads to difficulty in analysis
+
+In addition, relative abundances are often used to compare populations;
+
+If we sample 100 dogs from dog parks a and b, and get 10 and 20 corgis, it is reasonable to estimate that 10 and 20% of dogs in each park are corgis, however we can't conclude that there are more corgis in park b; if park a has 1000 dogs and park b has 200, then park a would have 100 corgis and park b would have 40. 
+
+relative abundances sum to 1, which could lead to incorrect results when applying standard statistical methods (pearson's corr, t-test, anova, linear regression)
 
 
 
@@ -82,7 +103,7 @@ For example, we can't measure self-esteem (latent), but we can use the compiled 
 
 Wu, Berkow (2013) defines a latent variable as the true bacterial composition in a sample. However, several measurement platforms are used to measure this composition. Latent variable analysis used to identify the most reliable measurement platform.
 
-# insert image of basic latentt variable model (like wu berkow 2013)
+#### insert image of basic latentt variable model (like wu berkow 2013)
 
 #### LMM recap
 Recall that for a sample of $n$ subjects with $r_i$ repeated measures $Y_{ij}$, the outcome value for subject $i$ at the $rth$ measurement at time $t_{ij}$, the linear mixed model is as follows:
@@ -175,7 +196,7 @@ For primary models, we will fit only using age to see if we can build classes wi
 
 In order to fit this model, we need our outcomes to be normalized. For compositional data, two common transformations are the centered logratio transformation and the isometric logratio transformation. While the CLR transformation is more simple to compute and interpret, the resulting parts sums to 0, which may lead to singularity issues in model fitting. Because of this the ILR (which does not run into singularity issues at the cost of interpretabilty) will be used. 
 
-
+# sources
 ### Highlighted articles using latent class models
 
 Bacharier (2019) - phenotypes & mixed models with trajectories for airways in children
@@ -195,3 +216,6 @@ Diagnosis of Cystic Fibrosis: Consensus Guidelines from the Cystic Fibrosis Foun
 Characteristics and outcomes of oral antibiotic treated pulmonary exacerbations in children with cystic fibrosis Farrell (2018) - background
 
 https://www.cysticfibrosis.org.uk/what-is-cystic-fibrosis/how-does-cystic-fibrosis-affect-the-body/symptoms-of-cystic-fibrosis/lungs - background on cf
+
+The Human Microbiome Project Turnbaugh 2007 - background on microbiome
+analysis of composition of microbiomes mandal 2015- background on microbiome data
