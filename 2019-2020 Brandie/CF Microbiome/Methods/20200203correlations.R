@@ -151,3 +151,22 @@ load_neutro_cor = ggplot(data = patient_inflam) +
   labs(title = "Change in Log-Copies/Reaction (V2-V1) vs Change in % Neutrophil",
        x = "Change in Log-Copies/Reaction", y = "Change in % Neutrophil")
 print(load_neutro_cor) # lots of missing data
+
+# save plots
+setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
+ggsave("20200420load_elas_cor.tiff", plot = load_elas_cor, height = 12, width = 12)
+ggsave("20200420load_il1b_cor.tiff", plot = load_IL1B_cor, height = 12, width = 12)
+ggsave("20200420load_il8_cor.tiff", plot = load_IL8_cor, height = 12, width = 12)
+ggsave("20200420load_hmgb_cor.tiff", plot = load_HMGB_cor, height = 12, width = 12)
+ggsave("20200420load_cellct_cor.tiff", plot = load_cellct_cor, height = 12, width = 12)
+ggsave("20200420load_neutro_cor.tiff", plot = load_neutro_cor, height = 12, width = 12)
+
+
+### correlations inflam markers
+cor(patient_inflam$load_dif,patient_inflam$elas_dif, use = "complete.obs", method = "spearman") # -0.214
+cor(patient_inflam$load_dif,patient_inflam$IL1B_dif, use = "complete.obs", method = "spearman") # 0.0330
+cor(patient_inflam$load_dif,patient_inflam$IL8_dif, use = "complete.obs", method = "spearman") # 0.2
+cor(patient_inflam$load_dif,patient_inflam$HMGB_1_dif, use = "complete.obs", method = "spearman") #0.213
+cor(patient_inflam$load_dif,patient_inflam$cellct_dif, use = "complete.obs", method = "spearman")# -0.0714
+cor(patient_inflam$load_dif,patient_inflam$neutrophils_dif, use = "complete.obs", method = "spearman") # -0.429
+
