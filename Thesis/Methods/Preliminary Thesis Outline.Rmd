@@ -67,6 +67,8 @@ Several papers have emphasized the utility of building latent variable models in
 
 (Wu,Berkow 2013) mentions that RMANOVA special, more constrained case of LV SEM and that LV models more flexible, better fit
 
+"All we need" is a normally transformed outcome to use this method 
+
 Several studies used a similar method using Bayesian LV models to get around normality assumption
 
 ## Thesis Questions 
@@ -103,8 +105,17 @@ For example, we can't measure self-esteem (latent), but we can use the compiled 
 
 Wu, Berkow (2013) defines a latent variable as the true bacterial composition in a sample. However, several measurement platforms are used to measure this composition. Latent variable analysis used to identify the most reliable measurement platform.
 
-#### insert image of basic latentt variable model (like wu berkow 2013)
+### how does this compare to other methods
 
+Very similar to cluster analysis; the goal is to discover groups based on data; this is the goal of my analysis
+
+sub-genre of cluster?
+
+what we are interested is measured imperfectly (latent)
+
+similar to factor analysis, but factor analysis covers structure of variables (correlations), while lca covers structures of the structure of the cases themselves
+
+what's nice about this method is its ability to incorporate components of a multivariate (generalized) linear mixed model into the latent classification
 #### LMM recap
 Recall that for a sample of $n$ subjects with $r_i$ repeated measures $Y_{ij}$, the outcome value for subject $i$ at the $rth$ measurement at time $t_{ij}$, the linear mixed model is as follows:
 
@@ -219,3 +230,5 @@ https://www.cysticfibrosis.org.uk/what-is-cystic-fibrosis/how-does-cystic-fibros
 
 The Human Microbiome Project Turnbaugh 2007 - background on microbiome
 analysis of composition of microbiomes mandal 2015- background on microbiome data
+
+http://www.john-uebersax.com/stat/faq.htm#otherm - cites some papers (to be read/ cited later) but gives a nice overview of lca
