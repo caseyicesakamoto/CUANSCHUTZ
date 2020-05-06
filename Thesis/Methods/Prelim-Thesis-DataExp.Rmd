@@ -1,0 +1,63 @@
+---
+title: "Thesis Code Prelim"
+author: "Casey Sakamoto"
+date: "5/5/2020"
+output: pdf_document
+---
+For Preliminary Data Analysis and Cleaning
+```{r setup, include=FALSE}
+# libraries
+library(Hmisc)
+library(tidyverse)
+library(compositions)
+library(coda.base)
+library(vegan)
+library(lcmm)
+# data
+BONUS_Species <- read.delim("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_Species.txt")
+```
+
+```{r summaries}
+describe(BONUS_Species)
+# 22 distinct phyla, 550 last; tons of 0's up to 90th pctl
+
+##### Stack Barchart ######
+bonus_cutoff5 = BONUS_Species %>% filter(perc_total > 5)
+
+# position for barchart labels
+bonus_cutoff5 = bonus_cutoff5 %>% group_by(last) %>% mutate(pos = cumsum(perc_total) - (0.5)* perc_total)
+
+# stack labels
+taxa_sbc_c5 = ggplot(data = bonus_cutoff5,
+                     aes(x = month, y = perc_total, fill = last, label = last)) + 
+  geom_bar(stat = "identity") + facet_wrap(~Patient)+
+  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+
+taxa_sbc_c5 = taxa_sbc_c5 + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Change in Community Composition Within Subjects",
+                                 x = "Visit", 
+                                 y = "Total Percent of Community")
+setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
+ggsave("20200505testexpl_sbc.png", plot = taxa_sbc_c5, height = 70, width = 70, limitsize = FALSE)
+# ================================================================ #
+
+##### Transforms #####
+# coda.base package
+test_patient = BONUS_Species %>% filter(Patient=="B335", month==1, seq_count >0)%>% select(seq_count, perc_total)
+
+hist(test_patient$seq_count)
+a = clr(test_patient$seq_count)
+hist(a)
+
+b = clr(test_patient$perc_total)
+
+hist(a);hist(b)
+# comp package
+# BONUS_Species%>% select(Patient, month, perc_total, last)%>%group_by(Patient, month) %>% filter(perc_total > 0) 
+# test_clr
+# sum(test_clr)
+# hist(test_clr)
+```
+
