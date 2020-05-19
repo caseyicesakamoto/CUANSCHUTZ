@@ -10,7 +10,6 @@ For Preliminary Data Analysis and Cleaning
 library(Hmisc)
 library(tidyverse)
 library(compositions)
-library(coda.base)
 library(vegan)
 library(lcmm)
 # data
@@ -42,22 +41,62 @@ taxa_sbc_c5 = taxa_sbc_c5 +
 setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
 ggsave("20200505testexpl_sbc.png", plot = taxa_sbc_c5, height = 70, width = 70, limitsize = FALSE)
 # ================================================================ #
-
-##### Transforms #####
-# coda.base package
-test_patient = BONUS_Species %>% filter(Patient=="B335", month==1, seq_count >0)%>% select(seq_count, perc_total)
-
-hist(test_patient$seq_count)
-a = clr(test_patient$seq_count)
-hist(a)
-
-b = clr(test_patient$perc_total)
-
-hist(a);hist(b)
-# comp package
-# BONUS_Species%>% select(Patient, month, perc_total, last)%>%group_by(Patient, month) %>% filter(perc_total > 0) 
-# test_clr
-# sum(test_clr)
-# hist(test_clr)
 ```
 
+```{r clr}
+# each sample identified by molecular id; data in long format 
+samples_long = BONUS_Species %>% select(OTU_Name, seq_count, molecular_id)
+samples_wide = samples_long %>% spread(key = molecular_id, value = seq_count)
+
+# convert to numeric cells from factor format
+matrix.dat = data.matrix(samples_wide[,-1])
+rownames(matrix.dat) = samples_wide[,1]
+
+#calculate number of samples
+n_samp <- ncol(matrix.dat)
+n_samp
+
+#calculate number of taxa
+n_org <- nrow(matrix.dat)
+n_org
+
+#generate matrix of counts
+counts <- matrix.dat
+#generate vector of total counts
+total <- apply(counts,2,sum)
+
+#define matrices
+ra <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+l_ra <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+clr <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+gm <- rep(0,n_samp)
+c <- rep(0,n_samp)
+
+for (i in 1:n_samp) {
+               #calc weight
+               c[i] <- 1/total[i]
+
+               for (j in 1:n_org) {
+               #transform counts to relative abundance and add small amount and log transform
+               ra[j,i] <- (counts[j,i]+c[i])/(total[i]+c[i]*n_org)
+               l_ra[j,i] <- log(ra[j,i])
+               }
+               #calculate gm
+               gm[i]=mean(l_ra[ ,i])
+               clr[ ,i] <- l_ra[ ,i] - gm[i]
+}
+
+
+#verify this code gives same result as compositions package
+ra2=t(ra)
+dat= clr(acomp(ra2))
+dat[1,]
+clr[,1]
+hist(dat[1,]);hist(clr[,1])
+
+# both clr and ilr look pretty bad w/ so much 0's
+```
+
+```{r grouping}
+
+```
