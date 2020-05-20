@@ -89,7 +89,7 @@ for (i in 1:n_samp) {
 
 #verify this code gives same result as compositions package
 ra2=t(ra)
-dat= clr(acomp(ra2))
+dat= ilr(acomp(ra2))
 dat[1,]
 clr[,1]
 hist(dat[1,]);hist(clr[,1])
@@ -98,5 +98,71 @@ hist(dat[1,]);hist(clr[,1])
 ```
 
 ```{r grouping}
+BONUS_Species =  BONUS_Species %>% mutate(taxa_group = case_when(grepl("Veillonella", OTU_Name) ~ "Veillonella",
+                                                                 grepl("Streptococcus", OTU_Name) ~ "Streptococcus",
+                                                                 grepl("Prevotella", OTU_Name) ~ "Prevotella",
+                                                                 TRUE ~ "Other"))
 
+# 92% other; 2.5% Prev; 3.6% Strep, 1.6% Veil
+describe(BONUS_Species$taxa_group)
+
+# try a clr/ilr with the grouped
+# each sample identified by molecular id; data in long format 
+samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id)
+# need to compress similar cells
+groups_long = samples_long %>% group_by(taxa_group, molecular_id) %>% summarise(seq_count = sum(seq_count))
+# convert to wide format  
+groups_wide = groups_long %>% spread(key = molecular_id, value = seq_count)
+
+# convert to numeric cells from factor format
+matrix.dat = data.matrix(groups_wide[,-1])
+# for some reason this isnt working
+# rownames(matrix.dat) = groups_wide[,1]
+
+#calculate number of samples
+n_samp <- ncol(matrix.dat)
+n_samp
+
+#calculate number of taxa
+n_org <- nrow(matrix.dat)
+n_org
+
+#generate matrix of counts
+counts <- matrix.dat
+#generate vector of total counts
+total <- apply(counts,2,sum)
+
+#define matrices
+ra <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+l_ra <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+clr <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+gm <- rep(0,n_samp)
+c <- rep(0,n_samp)
+
+for (i in 1:n_samp) {
+               #calc weight
+               c[i] <- 1/total[i]
+
+               for (j in 1:n_org) {
+               #transform counts to relative abundance and add small amount and log transform
+               ra[j,i] <- (counts[j,i]+c[i])/(total[i]+c[i]*n_org)
+               l_ra[j,i] <- log(ra[j,i])
+               }
+               #calculate gm
+               gm[i]=mean(l_ra[ ,i])
+               clr[ ,i] <- l_ra[ ,i] - gm[i]
+}
+
+
+#verify this code gives same result as compositions package
+ra2=t(ra)
+rownames(ra2) = colnames(groups_wide[,-1])
+colnames(ra2) = groups_wide$taxa_group
+dat= clr(acomp(ra2))
+dat[1,]
+clr[,1]
+
+test = as.data.frame(ra2)
+# explore this set
+hist(test$Veillonella);hist(test$Streptococcus);hist(test$Prevotella) ;hist(test$Other)
 ```
