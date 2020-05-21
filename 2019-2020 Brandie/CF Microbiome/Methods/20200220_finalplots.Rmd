@@ -92,10 +92,8 @@ outpatient2v = full_join(outpatient2v, name_df, by= "sid")
 #### PLOTS #####
 MH_subj = MH_subj%>% arrange(MH_subj$MH_BD)
 
-MH_box = ggplot(data = MH_subj, aes(x = "", y = MH_BD, label= sid_new)) + geom_boxplot(outlier.shape = NA) + geom_point()
-MH_box = MH_box + labs(title = "Beta Diversity Within Subjects",
-                       subtitle = "Visit 1 - Visit 2",
-                       x = "", 
+MH_box = ggplot(data = MH_subj, aes(x = "", y = MH_BD, label= sid_new)) + geom_boxplot(outlier.shape = NA, position = position_dodge(width = 0.5)) + geom_point()
+MH_box = MH_box + labs(x = "", 
                        y = "Morisita-Horn Beta Diversity")
 
 # outside middle 50%
@@ -104,11 +102,14 @@ outer_quart = MH_box + geom_label_repel(data = subset(MH_subj,!between(MH_BD,qua
                                         direction = "x")+theme_classic()
 
 # bottom 25%
-lower_quart = MH_box + geom_label_repel(data = subset(MH_subj, MH_BD < quantile(MH_BD, .25)),
-                                        direction = "x")+theme_classic()
+# lower_quart = MH_box + geom_label_repel(data = subset(MH_subj, MH_BD < quantile(MH_BD, .25)),
+#                                         direction = "x")+theme_classic()
+
 # save plots
-setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
-ggsave("MH_outer_qtls.tiff", plot = outer_quart, dpi = 300)
+# custom saved in export window
+# setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
+# print(outer_quart)
+# ggsave("MH_outer_qtls.tiff", plot = outer_quart, dpi = 300)
 ```
 
 ```{r stacked barcharts}
@@ -122,7 +123,7 @@ outpatient_cutoff5 = outpatient_cutoff5 %>% group_by(last) %>% mutate(pos = cums
 taxa_sbc_c5 = ggplot(data = outpatient_cutoff5,
                      aes(x = visit, y = perc_total, fill = last, label = last)) + 
   geom_bar(stat = "identity") + facet_wrap(~sid_new)+
-  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+  geom_text(size = 8, position = position_stack(vjust = 0.5)) 
 
 taxa_sbc_c5 = taxa_sbc_c5 + 
   theme_classic()+
@@ -141,23 +142,23 @@ library(data.table)
 long_op = outpatient2v %>% select(c("sid_new", "visit", "lq_all"))
 wide_op = long_op %>% dcast(sid_new~visit, fun=mean) 
 long_op = wide_op %>% gather(visit, lq_all, `1`:`2`)
-lq_all_noodle = ggplot(data = long_op, 
-                       aes(x = as.numeric(visit), y = 10^(lq_all), group = sid_new, label = sid_new)) + 
+
+#### plot
+lq_all_noodle = ggplot(data = long_op, aes(x = as.numeric(visit), y = 10^(lq_all),
+                                           group = sid_new, label = sid_new)) +
   geom_line() + 
-  scale_y_log10() +
-  stat_summary(aes(group = 1), 
-               geom = "line", fun.y = mean, color = "blue") 
-#geom_text(aes(label = sid), size = 2)
-lq_all_noodle = lq_all_noodle + labs(title = "Change in Log Copies/Reaction Within Subjects",
-                                     x = "Visit", 
-                                     y = "Log Copies per Reaction") + theme_classic()
+  scale_y_log10(name = "Log Copies per Reaction") +
+  stat_summary(aes(group = 1),
+               geom = "line", fun.y = mean, color = "blue") +
+  scale_x_continuous(breaks = c(1, 2), labels = c("Pre", "Post"))
+lq_all_noodle = lq_all_noodle + labs(x = "Visit")  + theme_classic()
 
 lq_all_noodle = lq_all_noodle  + geom_label_repel(point.padding = NA,
                                                   #direction = "y",
-                                                  size = 2)
-#print(lq_all_noodle)
+                                                  size = 4.5)
+print(lq_all_noodle)
 setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
-ggsave("20200128_spaghetti_plot.tiff", plot = lq_all_noodle, height = 12, width = 12)
+ggsave("load_spaghetti_both.tiff", plot = lq_all_noodle, height = 10, width = 8)
 
 ## TBL differences
 wide_op = wide_op %>% mutate(load_diff = wide_op$`2` - wide_op$`1`)
