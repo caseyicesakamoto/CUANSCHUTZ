@@ -99,41 +99,51 @@ MH_box = MH_box + labs(x = "",
 # outside middle 50%
 outer_quart = MH_box + geom_label_repel(data = subset(MH_subj,!between(MH_BD,quantile(MH_BD,.25),
                                                                        quantile(MH_BD, .75))),
-                                        direction = "x")+theme_classic()
-
+                                        direction = "x") + theme_classic() + 
+  theme(axis.title = element_text(size = 14), axis.text.y = element_text(size = 10))
 # bottom 25%
 # lower_quart = MH_box + geom_label_repel(data = subset(MH_subj, MH_BD < quantile(MH_BD, .25)),
 #                                         direction = "x")+theme_classic()
+# no labels
+MH_box = ggplot(data = MH_subj, aes(x = "", y = MH_BD, label= sid_new)) + geom_boxplot(outlier.shape = NA, position = position_dodge(width = 0.5)) + geom_point()
+MH_box = MH_box + labs(x = "", 
+                       y = "Morisita-Horn Beta Diversity")
 
+outer_quart_nolab = MH_box + theme_classic() + 
+  theme(axis.title = element_text(size = 14), axis.text.y = element_text(size = 10))
 # save plots
 # custom saved in export window
 # setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
 # print(outer_quart)
-# ggsave("MH_outer_qtls.tiff", plot = outer_quart, dpi = 300)
+#ggsave("MH_outer_qtls.tiff", plot = outer_quart, width = 3, height = 5)
 ```
 
 ```{r stacked barcharts}
-# dropping those without 2 visits
+# dropping the taxa with less than 5% rel. abundance
 outpatient_cutoff5 = outpatient2v %>% filter(perc_total > 5)
 
 # position for barchart labels
 outpatient_cutoff5 = outpatient_cutoff5 %>% group_by(last) %>% mutate(pos = cumsum(perc_total) - (0.5)* perc_total)
 
+# abbreviate the taxa to first 4 letters
+outpatient_cutoff5 = outpatient_cutoff5 %>% mutate(last_abrv = substr(last, 1, 4))
+
 # stack labels
 taxa_sbc_c5 = ggplot(data = outpatient_cutoff5,
-                     aes(x = visit, y = perc_total, fill = last, label = last)) + 
+                     aes(x = visit, y = perc_total, fill = last_abrv, label = last_abrv)) + 
   geom_bar(stat = "identity") + facet_wrap(~sid_new)+
-  geom_text(size = 8, position = position_stack(vjust = 0.5)) 
+  geom_text(size = 4.5, position = position_stack(vjust = 0.5)) 
 
-taxa_sbc_c5 = taxa_sbc_c5 + 
-  theme_classic()+
-  theme(legend.position = "none")+
-  labs(title = "Change in Community Composition Within Subjects",
-                                 x = "Visit", 
-                                 y = "Total Percent of Community")
+taxa_sbc_c5 = taxa_sbc_c5 +
+  theme_classic() +
+  theme(legend.position = "none") +
+  labs(y = "Total Percent of Community") + 
+  scale_x_continuous(name = "",breaks = c(1, 2), labels = c("Pre", "Post")) + 
+  theme(axis.title = element_text(size = 18), axis.text = element_text(size = 14), 
+        strip.text = element_text(size = 14))
 
 setwd("D:/Repositories/CUANSCHUTZ/2019-2020 Brandie/CF Microbiome/Output")
-ggsave("20200128_sbc_c5.tiff", plot = taxa_sbc_c5, height = 12, width = 12)
+ggsave("sbc_c5.tiff", plot = taxa_sbc_c5, height = 11, width = 8)
 ```
 
 ```{r spaghetti plots}
