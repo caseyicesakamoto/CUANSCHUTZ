@@ -74,8 +74,13 @@ grid.arrange(FEV_BD_cor,FEV_load_cor,FEV_cfu_cor,ncol = 3)
 # ggsave("20200204FEV_load_corr.tiff", plot = FEV_load_cor, height = 12, width = 12)
 # ggsave("20200204FEV_cfu_corr.tiff", plot = FEV_cfu_cor, height = 12, width = 12)
 
+#### load vs MH
+load_bd_cor = ggplot(data = patient_df) + 
+  geom_point(aes(MH_BD,load_dif)) + geom_abline(slope = 0, intercept = c(0.5, 0, -.5))
+load_bd_cor = load_bd_cor + theme_classic() +  labs(x = "Morisita-Horn Beta Diversity",
+                                                    y = "Change in Log-Copies/Reaction")
 
-
+load_bd_cor
 ##### alpha diversity #####
 # used shannons H
 outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/research/20200128plots/outpatient2020_01_25.csv")
