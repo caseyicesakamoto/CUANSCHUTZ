@@ -10,7 +10,6 @@ For Preliminary Data Analysis and Cleaning
 library(Hmisc)
 library(tidyverse)
 library(compositions)
-library(vegan)
 library(lcmm)
 # data
 BONUS_Species <- read.delim("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_Species.txt")
@@ -43,7 +42,7 @@ ggsave("20200505testexpl_sbc.png", plot = taxa_sbc_c5, height = 70, width = 70, 
 # ================================================================ #
 ```
 
-```{r clr}
+```{r clr test code}
 # each sample identified by molecular id; data in long format 
 samples_long = BONUS_Species %>% select(OTU_Name, seq_count, molecular_id)
 samples_wide = samples_long %>% spread(key = molecular_id, value = seq_count)
@@ -89,23 +88,64 @@ for (i in 1:n_samp) {
 
 #verify this code gives same result as compositions package
 ra2=t(ra)
-dat= ilr(acomp(ra2))
-dat[1,]
+dat_clr= clr(acomp(ra2))
+dat_ilr= ilr(acomp(ra2))
+dat_clr[1,]
 clr[,1]
-hist(dat[1,]);hist(clr[,1])
+hist(dat_clr[1,]);hist(clr[,1])
 
 # both clr and ilr look pretty bad w/ so much 0's
 ```
 
+For grouping, when looking at counts, Strep should definitely be a group; 
 ```{r grouping}
+# lets check RA of the taxa to motivate the groupings:
+BSG = BONUS_Species %>% select(OTU_Name, seq_count, perc_total, molecular_id) 
+
+counts = BSG %>% group_by(OTU_Name) %>% summarise(sum_sc = sum(seq_count))
+# 153 million counts total
+total_ct = sum(counts$sum_sc)
+
+# prelim groupings
+counts$OTU_Name = as.character(counts$OTU_Name)
+counts = counts %>% mutate(taxa_group = case_when(grepl("Veillonella", OTU_Name) ~ "Veillonella",
+                                                  grepl("Streptococcus", OTU_Name) ~ "Streptococcus",
+                                                  grepl("Prevotella", OTU_Name) ~ "Prevotella",
+                                                  grepl("Neisseria", OTU_Name) ~ "Neisseria",
+                                                  TRUE ~ OTU_Name))
+# compress same groups into one
+counts = counts %>% group_by(taxa_group) %>% summarise(sum_sc = sum(sum_sc))
+
+# percent of total sequence data
+# strep 
+strep = counts %>% filter(taxa_group == "Streptococcus") %>% select(sum_sc)
+strep/total_ct # makes up 51% of the counts
+
+# veil
+veil = counts %>% filter(taxa_group == "Veillonella") %>% select(sum_sc)
+veil/total_ct
+
+# neis
+neis = counts %>% filter(taxa_group == "Neisseria") %>% select(sum_sc)
+neis/total_ct
+
+# prev
+prev = counts %>% filter(taxa_group == "Prevotella") %>% select(sum_sc)
+prev/total_ct
+# =========== #
+# create groupings
 BONUS_Species =  BONUS_Species %>% mutate(taxa_group = case_when(grepl("Veillonella", OTU_Name) ~ "Veillonella",
                                                                  grepl("Streptococcus", OTU_Name) ~ "Streptococcus",
                                                                  grepl("Prevotella", OTU_Name) ~ "Prevotella",
                                                                  TRUE ~ "Other"))
 
+# 9 species Veill, 20 Strep, 14 Prev 
+BONUS_Species %>% group_by(molecular_id, Age) %>% summarise(sum_v = sum(grepl("Prevotella", OTU_Name)))
 # 92% other; 2.5% Prev; 3.6% Strep, 1.6% Veil
 describe(BONUS_Species$taxa_group)
 
+```
+```{r clr groups}
 # try a clr/ilr with the grouped
 # each sample identified by molecular id; data in long format 
 samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id)
@@ -158,11 +198,56 @@ for (i in 1:n_samp) {
 ra2=t(ra)
 rownames(ra2) = colnames(groups_wide[,-1])
 colnames(ra2) = groups_wide$taxa_group
-dat= clr(acomp(ra2))
+dat = clr(acomp(ra2))
 dat[1,]
 clr[,1]
 
-test = as.data.frame(ra2)
+# look at groups
+dat_clr = clr(acomp(ra2))
+dat_ilr = ilr(acomp(ra2))
 # explore this set
-hist(test$Veillonella);hist(test$Streptococcus);hist(test$Prevotella) ;hist(test$Other)
+# clr
+test_clr = as.data.frame(dat_clr)
+par(mfrow = c(2,2))
+hist(test$Veillonella)
+hist(test$Streptococcus)
+hist(test$Prevotella)
+hist(test$Other)
+# ilr
+test_ilr = as.data.frame(dat_ilr)
+par(mfrow = c(2,2))
+hist(test_ilr$V1)
+hist(test_ilr$V2)
+hist(test_ilr$V3)
+
+
+
+```
+
+```{r sbd groups}
+# if too many taxa, filter(perc_total > 5)
+# each sample identified by molecular id; data in long format 
+samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id,perc_total, Patient, Age) %>% filter(perc_total >3)
+# need to compress similar cells
+groups_long = samples_long %>% group_by(taxa_group, molecular_id, Patient, Age) %>% summarise(seq_count = sum(seq_count), perc_total = sum(perc_total))
+#
+bonus_groups = groups_long
+
+# position for barchart labels
+bonus_groups = groups_long %>% group_by(taxa_group) %>% mutate(pos = cumsum(perc_total) - (0.5)* perc_total)
+
+# stack labels
+group_sbc = ggplot(data = bonus_groups,
+                     aes(x = Age, y = perc_total, fill = taxa_group, label = taxa_group)) + 
+  geom_bar(stat = "identity") + facet_wrap(~Patient)+
+  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+
+group_sbc = group_sbc + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Change in Community Composition Within Subjects",
+                                 x = "Age", 
+                                 y = "Total Percent of Community")
+setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
+ggsave("grouped_sbc.png", plot = group_sbc, height = 70, width = 70, limitsize = FALSE)
 ```
