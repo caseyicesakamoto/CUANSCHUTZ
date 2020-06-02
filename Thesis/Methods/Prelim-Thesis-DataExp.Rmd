@@ -229,7 +229,7 @@ hist(test_ilr$V4)
 ```{r sbd groups}
 # if too many taxa, filter(perc_total > 5)
 # each sample identified by molecular id; data in long format 
-samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id,perc_total, Patient, Age) %>% filter(perc_total >3)
+samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id,perc_total, Patient, Age) 
 # need to compress similar cells
 groups_long = samples_long %>% group_by(taxa_group, molecular_id, Patient, Age) %>% summarise(seq_count = sum(seq_count), perc_total = sum(perc_total))
 #
