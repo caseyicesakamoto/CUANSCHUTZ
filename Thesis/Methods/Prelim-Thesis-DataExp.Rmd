@@ -137,14 +137,15 @@ prev/total_ct
 BONUS_Species =  BONUS_Species %>% mutate(taxa_group = case_when(grepl("Veillonella", OTU_Name) ~ "Veillonella",
                                                                  grepl("Streptococcus", OTU_Name) ~ "Streptococcus",
                                                                  grepl("Prevotella", OTU_Name) ~ "Prevotella",
+                                                                 grepl("Neisseria", OTU_Name) ~ "Neisseria",
                                                                  TRUE ~ "Other"))
 
 # 9 species Veill, 20 Strep, 14 Prev 
 BONUS_Species %>% group_by(molecular_id, Age) %>% summarise(sum_v = sum(grepl("Prevotella", OTU_Name)))
 # 92% other; 2.5% Prev; 3.6% Strep, 1.6% Veil
 describe(BONUS_Species$taxa_group)
-
 ```
+
 ```{r clr groups}
 # try a clr/ilr with the grouped
 # each sample identified by molecular id; data in long format 
