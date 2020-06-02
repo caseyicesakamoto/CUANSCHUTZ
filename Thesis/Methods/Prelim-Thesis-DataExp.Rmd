@@ -209,18 +209,19 @@ dat_ilr = ilr(acomp(ra2))
 # explore this set
 # clr
 test_clr = as.data.frame(dat_clr)
-par(mfrow = c(2,2))
-hist(test$Veillonella)
-hist(test$Streptococcus)
-hist(test$Prevotella)
-hist(test$Other)
+par(mfrow = c(2,3))
+hist(test_clr$Veillonella)
+hist(test_clr$Streptococcus)
+hist(test_clr$Prevotella)
+hist(test_clr$Neisseria)
+hist(test_clr$Other)
 # ilr
 test_ilr = as.data.frame(dat_ilr)
 par(mfrow = c(2,2))
 hist(test_ilr$V1)
 hist(test_ilr$V2)
 hist(test_ilr$V3)
-
+hist(test_ilr$V4)
 
 
 ```
