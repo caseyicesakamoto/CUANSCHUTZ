@@ -11,11 +11,14 @@ library(Hmisc)
 library(tidyverse)
 library(compositions)
 library(lcmm)
+library(data.table)
 # data
 BONUS_Species <- read.delim("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_Species.txt")
 ```
 
 ```{r summaries}
+# INITIAL DATA EXPlORE/ UNGROUPED SBC
+# SKIP THIS CHUNK WHILE PERFORMING ANALYSIS
 describe(BONUS_Species)
 # 22 distinct phyla, 550 last; tons of 0's up to 90th pctl
 
@@ -43,6 +46,8 @@ ggsave("20200505testexpl_sbc.png", plot = taxa_sbc_c5, height = 70, width = 70, 
 ```
 
 ```{r clr test code}
+# this chunk to confirm the code works
+# SKIP THIS CHUNK WHEN PERFORMING ANALYSIS
 # each sample identified by molecular id; data in long format 
 samples_long = BONUS_Species %>% select(OTU_Name, seq_count, molecular_id)
 samples_wide = samples_long %>% spread(key = molecular_id, value = seq_count)
@@ -99,6 +104,7 @@ hist(dat_clr[1,]);hist(clr[,1])
 
 For grouping, when looking at counts, Strep should definitely be a group; 
 ```{r grouping}
+###### Check which groupings make some sense #############
 # lets check RA of the taxa to motivate the groupings:
 BSG = BONUS_Species %>% select(OTU_Name, seq_count, perc_total, molecular_id) 
 
@@ -133,6 +139,7 @@ neis/total_ct
 prev = counts %>% filter(taxa_group == "Prevotella") %>% select(sum_sc)
 prev/total_ct
 # =========== #
+######## Create Groupings #############
 # create groupings
 BONUS_Species =  BONUS_Species %>% mutate(taxa_group = case_when(grepl("Veillonella", OTU_Name) ~ "Veillonella",
                                                                  grepl("Streptococcus", OTU_Name) ~ "Streptococcus",
@@ -144,6 +151,7 @@ BONUS_Species =  BONUS_Species %>% mutate(taxa_group = case_when(grepl("Veillone
 BONUS_Species %>% group_by(molecular_id, Age) %>% summarise(sum_v = sum(grepl("Prevotella", OTU_Name)))
 # 92% other; 2.5% Prev; 3.6% Strep, 1.6% Veil
 describe(BONUS_Species$taxa_group)
+# =========================================== #
 ```
 
 ```{r clr groups}
@@ -208,7 +216,7 @@ dat_clr = clr(acomp(ra2))
 dat_ilr = ilr(acomp(ra2))
 # explore this set
 # clr
-test_clr = as.data.frame(dat_clr)
+groups_clr = as.data.frame(dat_clr)
 par(mfrow = c(2,3))
 hist(test_clr$Veillonella)
 hist(test_clr$Streptococcus)
@@ -216,7 +224,7 @@ hist(test_clr$Prevotella)
 hist(test_clr$Neisseria)
 hist(test_clr$Other)
 # ilr
-test_ilr = as.data.frame(dat_ilr)
+groups_ilr = as.data.frame(dat_ilr)
 par(mfrow = c(2,2))
 hist(test_ilr$V1)
 hist(test_ilr$V2)
@@ -227,6 +235,8 @@ hist(test_ilr$V4)
 ```
 
 ```{r sbd groups}
+#### THIS USED FOR THESIS PROPOSAL PRESENTATION;
+#### SKIP FOR ANALYSIS
 # if too many taxa, filter(perc_total > 5)
 # each sample identified by molecular id; data in long format 
 samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id,perc_total, Patient, Age) 
@@ -252,4 +262,35 @@ group_sbc = group_sbc +
                                  y = "Total Percent of Community")
 setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
 ggsave("grouped_sbc.png", plot = group_sbc, height = 70, width = 70, limitsize = FALSE)
+```
+
+
+First Iteration I'm trying 4 groups (Neis, Strep, Prev, Veil, Other) CLR and ILR: 6-17-2020
+```{r Analysis Dataset}
+# This chunk to create the analysis dataset
+# will update to include covariates for secondary analyses
+
+# clr, ilr groups into dataframes w/ molecular id col
+setDT(groups_clr, keep.rownames = "molecular_id")[]
+setDT(groups_ilr, keep.rownames = "molecular_id")[]
+
+# Select Age (cts&cat), MolecularID, Patient ID
+# antibiotics, genotype, feeding types, growth seem likely to include
+# including Num_samples to decide whether to include those with < 3 visits
+BONUS_lcmm = BONUS_Species %>% select("Patient", "molecular_id",
+                                      "Age", "agemos", "Num_Samples") %>% unique.data.frame()
+BONUS_lcmm = full_join(BONUS_lcmm, groups_clr, by= "molecular_id")
+BONUS_lcmm = full_join(BONUS_lcmm, groups_ilr, by = "molecular_id")
+
+describe(BONUS_lcmm$Num_Samples)
+# B503 has 2 age 5 measurements w/ diff ageccat but same mb
+# B 301 has 5 measurements w/ 6 recorded as num samples; is there one missing?
+BONUS_lcmm %>% filter(Num_Samples == 9)%>% group_by(Patient) %>% summarize(n())
+```
+
+```{r write csv}
+# save this dataset for analysis
+# save to folder NOT in git repo
+setwd("C:/Users/Casey/Desktop/WorkData") # desktop
+write.csv(BONUS_lcmm, "BONUS_lcmm.csv")
 ```

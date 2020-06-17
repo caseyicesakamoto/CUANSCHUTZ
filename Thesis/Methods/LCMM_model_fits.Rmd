@@ -1,0 +1,20 @@
+---
+title: "Thesis Methods"
+author: "Casey Sakamoto"
+date: "6/17/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(lcmm) # to fit the model 
+library(tidyverse) # to mess around w data
+
+# load in analysis dataset (made in prelim-thesis-dataexp rmd)
+BONUS_lcmm <- read.csv("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_lcmm.csv")
+```
+
+```{r data manipulation}
+# remove one of B503 age 5 meas ( doesnt really matter if im using age and not agemos)
+# remove subjects with below 2/3 visits al# = at least # visits
+BONUS_al2 = BONUS_lcmm %>% filter()
+```
