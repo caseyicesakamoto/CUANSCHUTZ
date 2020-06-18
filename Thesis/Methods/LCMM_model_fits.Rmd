@@ -14,7 +14,23 @@ BONUS_lcmm <- read.csv("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_lcmm.c
 ```
 
 ```{r data manipulation}
-# remove one of B503 age 5 meas ( doesnt really matter if im using age and not agemos)
+# remove one of B503 age 5 meas (no mb data for the lower one) C02613
 # remove subjects with below 2/3 visits al# = at least # visits
-BONUS_al2 = BONUS_lcmm %>% filter()
+# at least 2 visits
+BONUS_al2 = BONUS_lcmm %>% filter(!(molecular_id == "C02613" & agemos < 4.8)) %>% filter(Num_Samples > 1)
+# at least 3 visits
+BONUS_al3 = BONUS_lcmm %>% filter(!(molecular_id == "C02613" & agemos < 4.8)) %>% filter(Num_Samples > 2)
 ```
+NOTE: WE NEED TO CONVERT SUBID TO NUMERIC? IDK WHY BUT SPITTING OUT AN ERROR FOR ME
+```{r primary models}
+# g# will be the groups used t# will be the lowest visits allowed per subject inclusion
+# _lr will be normalizing method
+
+# all groups included clr, age rounded
+g4t2_clr = multlcmm(Streptococcus + Veillonella + Prevotella + Neisseria + Other ~ Age,
+                    random = ~1,subject = "Patient", data = BONUS_al2)
+
+test = hlme(Streptococcus ~ Age, subject = "Age", data = BONUS_al2)
+summary(test)
+```
+### Failed Conversion Attempts
