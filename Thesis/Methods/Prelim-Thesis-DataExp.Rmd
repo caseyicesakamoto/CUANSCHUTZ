@@ -285,7 +285,7 @@ BONUS_lcmm = full_join(BONUS_lcmm, groups_ilr, by = "molecular_id")
 describe(BONUS_lcmm$Num_Samples)
 # B503 has 2 age 5 measurements w/ diff ageccat but same mb
 # B 301 has 5 measurements w/ 6 recorded as num samples; is there one missing?
-BONUS_lcmm %>% filter(Num_Samples == 9)%>% group_by(Patient) %>% summarize(n())
+BONUS_lcmm %>% filter(Num_Samples == 9)%>% group_by(Patient) %>% summarize(n()) # checking # of samples w num samples
 ```
 
 ```{r write csv}

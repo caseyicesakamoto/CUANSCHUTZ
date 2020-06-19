@@ -11,6 +11,27 @@ library(tidyverse) # to mess around w data
 
 # load in analysis dataset (made in prelim-thesis-dataexp rmd)
 BONUS_lcmm <- read.csv("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_lcmm.csv")
+
+# NUMERIC ID
+BONUS_lcmm = BONUS_lcmm %>% select(-X) %>% mutate(patient_id = as.numeric(str_sub(Patient,start=2)))
+```
+NOTE: WE NEED TO CONVERT SUBID TO NUMERIC? IDK WHY BUT SPITTING OUT AN ERROR FOR ME WHEN FITTING MODELS
+
+```{r normality assump}
+# clr all groups
+hist(BONUS_lcmm$Streptococcus);hist(BONUS_lcmm$Veillonella);hist(BONUS_lcmm$Prevotella);hist(BONUS_lcmm$Neisseria); hist(BONUS_lcmm$Other)
+# strep a bit right skew
+# veil looks ok
+# prev looks like a bit bimodal
+# Neis by far the worst
+# other pretty right skewed
+
+# ilr all groups (4 cat instead of 5)
+hist(BONUS_lcmm$V1); hist(BONUS_lcmm$V2); hist(BONUS_lcmm$V3); hist(BONUS_lcmm$V4)
+# v1 doesnt look great
+# v2 some left skew
+# v3 some right skew
+# v4 looks fine
 ```
 
 ```{r data manipulation}
@@ -21,16 +42,215 @@ BONUS_al2 = BONUS_lcmm %>% filter(!(molecular_id == "C02613" & agemos < 4.8)) %>
 # at least 3 visits
 BONUS_al3 = BONUS_lcmm %>% filter(!(molecular_id == "C02613" & agemos < 4.8)) %>% filter(Num_Samples > 2)
 ```
-NOTE: WE NEED TO CONVERT SUBID TO NUMERIC? IDK WHY BUT SPITTING OUT AN ERROR FOR ME
-```{r primary models}
+
+```{r prelim models}
+# purpose is to see what converges and what doesnt
 # g# will be the groups used t# will be the lowest visits allowed per subject inclusion
 # _lr will be normalizing method
 
+##### at least 2 data points ######
 # all groups included clr, age rounded
-g4t2_clr = multlcmm(Streptococcus + Veillonella + Prevotella + Neisseria + Other ~ Age,
-                    random = ~1,subject = "Patient", data = BONUS_al2)
+g5t2_clr = multlcmm(Streptococcus + Veillonella + Prevotella + Neisseria + Other ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al2, maxiter = 300)
+summary(g5t2_clr) # doesnt converge up to 300 iter (~ 3.7 min)
 
-test = hlme(Streptococcus ~ Age, subject = "Age", data = BONUS_al2)
-summary(test)
+# all groups included ilr, age rounded
+g4t2_ilr = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al2, maxiter = 300)
+summary(g4t2_ilr) # converges!
+
+# excluding Other group clr
+g4t2_clr = multlcmm(Streptococcus + Veillonella + Prevotella + Neisseria ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al2, maxiter = 500)
+summary(g4t2_clr) # doesnt converge up to 500 iter (~ 3 min)
+
+# excluding Neisseria group clr
+g4t2_clr_2 = multlcmm(Streptococcus + Veillonella + Prevotella + Other ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al2, maxiter = 500)
+summary(g4t2_clr_2) # doesnt converge up to 500 iter (~ 3 min)
+
+# excluding Other, Neisseria groups clr
+g3t2_clr = multlcmm(Streptococcus + Veillonella + Prevotella ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al2, maxiter = 1000)
+summary(g3t2_clr) # doesnt converge up to 1000 iter (~ 3 min)
+
+# excluding Other, Prevotella groups clr
+g3t2_clr_2 = multlcmm(Streptococcus + Veillonella + Neisseria ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al2, maxiter = 1000)
+summary(g3t2_clr_2) # doesnt converge up to 1000 iter (~ 3 min)
+
+# CLR Strep + Other
+g2t2_clr = multlcmm(Streptococcus + Other ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al2, maxiter = 1000)
+summary(g2t2_clr) # converges!
+
+# CLR Strep + veil
+g2t2_clr_2 = multlcmm(Streptococcus + Veillonella ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al2, maxiter = 1000)
+summary(g2t2_clr_2) # converges! (~ 3 min)
+
+###### At least 3 data points ########
+# all groups included clr, age rounded
+g5t3_clr = multlcmm(Streptococcus + Veillonella + Prevotella + Neisseria + Other ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al3, maxiter = 300)
+summary(g5t3_clr) # doesnt converge up to 300 iter (~ 3.7 min)
+
+# all groups included ilr, age rounded
+g4t3_ilr = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al3, maxiter = 300)
+summary(g4t3_ilr) # converges!
 ```
 ### Failed Conversion Attempts
+#### at least 2 measurements
+- All 5 groups CLR
+- CLR groups - Other
+- CLR groups - Neis
+- CLR groups - Other & Neis
+- CLR groups - Other & Prev
+
+#### at least 3 measurements
+
+Its looking like ILR works right off the bat, but CLR we need to reduce to only a few (2) groups to get convergence
+
+```{R primary ilr models}
+#########################################################################################
+# fit different amount of latent classes for ILR set at lest 2 obs per subject
+# all groups included
+
+# 1 latent class
+mod1_ilr = g4t2_ilr
+
+# 2 latent classes
+mod2_ilr = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 2,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod2_ilr) # converges!
+
+mod2_ilr_gs = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 2,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod2_ilr) # converges!
+# 3 latent classes
+mod3_ilr  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 3,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod3_ilr) # doesnt converge (but only from the second deriv criteria)
+
+# 4 latent classes
+mod4_ilr  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 4,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod4_ilr) # doesnt converge (but only from the second deriv criteria)
+
+# 5 latent classes
+mod5_ilr  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 5,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod5_ilr) # doesnt converge for all 3 criteria
+
+# 6 latent classes
+mod6_ilr  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 6,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod6_ilr) # doesnt converge (but only from the second deriv criteria)
+
+# 7 latent classes
+mod7_ilr  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 7,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod7_ilr) # doesnt converge (for likleihood and 2nd deriv criteria)
+
+# 8 latent classes
+mod8_ilr  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 8,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod8_ilr) # doesnt converge (but only from the second deriv criteria)
+
+# 9 latent classes
+mod9_ilr  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 9,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod9_ilr) # doesnt converge (for likleihood and 2nd deriv criteria)
+
+# 10 latent classes
+mod10_ilr  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 10,B = random(mod1_ilr), data = BONUS_al2)
+summary(mod10_ilr) # doesnt converge (but only from the second deriv criteria)
+#########################################################################################
+
+summarytable(mod1_ilr, mod2_ilr, mod3_ilr, mod4_ilr, mod5_ilr, mod6_ilr, mod7_ilr, mod8_ilr, mod9_ilr, mod10_ilr) # at any point we are only getting 1 or 3 groups
+postprob(mod2_ilr) # extremely ambiguous for just 2 latent classes
+postprob(mod3_ilr) # extremely ambiguous for 3 lc
+```
+
+It seems like the gridsearched initial values classify a lot better; will do that from now on
+```{r ilr primary models 3 obs}
+# fit different amount of latent classes for ILR set at lest 2 obs per subject
+# all groups included
+# 1 latent class
+mod1_ilr3 = g4t3_ilr
+
+# 2 latent classes
+mod2_ilr3 = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 2,B = random(mod1_ilr3), data = BONUS_al3)
+summary(mod2_ilr3) # converges!
+
+# 3 latent classes
+# initial values from model 1
+mod3_ilr3  = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 3,B = random(mod1_ilr3), data = BONUS_al3)
+summary(mod3_ilr3) # converges!
+
+# initial values gridsearched
+mod3_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 3, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+# 4 latent classes
+mod4_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 4, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod4_ilr3_gs) # doesnt converge (but only from the second deriv criteria)
+
+# 5 latent classes
+mod5_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 5, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+# summary(mod5_ilr3) # doesnt converge for all 3 criteria
+
+# 6 latent classes
+mod6_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 6, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod6_ilr) # doesnt converge (but only from the second deriv criteria)
+
+# 7 latent classes
+mod7_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 7, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod7_ilr) # doesnt converge (for likleihood and 2nd deriv criteria)
+
+# 8 latent classes
+mod8_ilr3_gs = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 8, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod8_ilr) # doesnt converge (but only from the second deriv criteria)
+
+# 9 latent classes
+mod9_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 9, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod9_ilr) # doesnt converge (for likleihood and 2nd deriv criteria)
+
+# 10 latent classes
+mod10_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 10, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod10_ilr) # doesnt converge (but only from the second deriv criteria)
+
+summarytable(mod1_ilr3, mod2_ilr3, mod3_ilr3, mod3_ilr3_gs, mod4_ilr3_gs, mod5_ilr3_gs, mod6_ilr3_gs, mod7_ilr3_gs, mod8_ilr3_gs, mod9_ilr3_gs, mod10_ilr3_gs)
+postprob(mod4_ilr3_gs)
+summary(mod5_ilr3_gs)
+```
