@@ -8,7 +8,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 library(lcmm) # to fit the model 
 library(tidyverse) # to mess around w data
-
+library(Hmisc)
 # load in analysis dataset (made in prelim-thesis-dataexp rmd)
 BONUS_lcmm <- read.csv("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_lcmm.csv")
 
@@ -99,6 +99,21 @@ summary(g5t3_clr) # doesnt converge up to 300 iter (~ 3.7 min)
 g4t3_ilr = multlcmm(V1 + V2 + V3 + V4 ~ Age,
                     random = ~1,subject = "patient_id", data = BONUS_al3, maxiter = 300)
 summary(g4t3_ilr) # converges!
+
+# clr - other
+g4t3_clr = multlcmm(Streptococcus + Veillonella + Prevotella + Neisseria ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al3, maxiter = 500)
+summary(g4t3_clr)
+
+# clr - other, neisseria
+g3t3_clr = multlcmm(Streptococcus + Veillonella + Prevotella ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al3, maxiter = 500)
+summary(g3t3_clr)
+
+# clr - other, neisseria
+g2t3_clr = multlcmm(Streptococcus + Veillonella ~ Age,
+                    random = ~1,subject = "patient_id", data = BONUS_al3, maxiter = 500)
+summary(g2t3_clr)
 ```
 ### Failed Conversion Attempts
 #### at least 2 measurements
@@ -253,4 +268,21 @@ mod10_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
 summarytable(mod1_ilr3, mod2_ilr3, mod3_ilr3, mod3_ilr3_gs, mod4_ilr3_gs, mod5_ilr3_gs, mod6_ilr3_gs, mod7_ilr3_gs, mod8_ilr3_gs, mod9_ilr3_gs, mod10_ilr3_gs)
 postprob(mod4_ilr3_gs)
 summary(mod5_ilr3_gs)
+```
+
+```{r classifications}
+# using 1- 4 latent classes
+mod2_ilr3$pprob
+mod3_ilr3_gs$pprob %>% filter(class == 2)
+mod4_ilr3_gs$pprob
+# look how subs from 2, 3, 4 latent classes are classified
+# first 2 col are the classifications
+classed_2 = mod2_ilr3$pprob[,1:2] %>% rename(class2 = class)
+classed_3 = mod3_ilr3_gs$pprob[,1:2] %>% rename(class3 = class)
+classed_4 = mod4_ilr3_gs$pprob[,1:2] %>% rename(class4 = class)
+
+classifications = full_join(classed_2, classed_3, by = "patient_id")
+classifications = full_join(classifications, classed_4, by = "patient_id")
+
+classifications %>% group_by(class2,class3, class4) %>% summarise(n())
 ```
