@@ -200,7 +200,7 @@ postprob(mod3_ilr) # extremely ambiguous for 3 lc
 ```
 
 It seems like the gridsearched initial values classify a lot better; will do that from now on
-```{r ilr primary models 3 obs}
+```{r ilr primary models 3 obs linear}
 # fit different amount of latent classes for ILR set at lest 2 obs per subject
 # all groups included
 # 1 latent class
@@ -211,6 +211,10 @@ mod2_ilr3 = multlcmm(V1 + V2 + V3 + V4 ~ Age,
                     random = ~1,subject = "patient_id", mixture = ~1,
                     ng = 2,B = random(mod1_ilr3), data = BONUS_al3)
 summary(mod2_ilr3) # converges!
+
+mod2_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,
+                    ng = 2, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 
 # 3 latent classes
 # initial values from model 1
@@ -265,15 +269,78 @@ mod10_ilr3_gs  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
                     ng = 10, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 #summary(mod10_ilr) # doesnt converge (but only from the second deriv criteria)
 
-summarytable(mod1_ilr3, mod2_ilr3, mod3_ilr3, mod3_ilr3_gs, mod4_ilr3_gs, mod5_ilr3_gs, mod6_ilr3_gs, mod7_ilr3_gs, mod8_ilr3_gs, mod9_ilr3_gs, mod10_ilr3_gs)
+summarytable(mod1_ilr3, mod2_ilr3,mod2_ilr3_gs, mod3_ilr3, mod3_ilr3_gs, mod4_ilr3_gs, mod5_ilr3_gs, mod6_ilr3_gs, mod7_ilr3_gs, mod8_ilr3_gs, mod9_ilr3_gs, mod10_ilr3_gs)
 postprob(mod4_ilr3_gs)
 summary(mod5_ilr3_gs)
+```
+splines methods dont converge
+```{r models splines 3 obs}
+mod1_ilr3_s = multlcmm(V1 + V2 + V3 + V4 ~ Age,link = "splines",
+                    random = ~1,subject = "patient_id", data = BONUS_al3, maxiter = 300)
+summary(mod1_ilr3_s)
+
+# 2 latent classes
+mod2_ilr3_s = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1, link = "splines", B = random(mod1_ilr3_s),
+                    ng = 2, data = BONUS_al3)
+
+# 3 latent classes
+# initial values from model 1
+# mod3_ilr3 _ = multlcmm(V1 + V2 + V3 + V4 ~ Age,
+#                     random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+#                     ng = 3,B = random(mod1_ilr3), data = BONUS_al3)
+# summary(mod3_ilr3) # converges!
+
+# initial values gridsearched
+mod3_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1, link = "splines",
+                    ng = 3, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+# 4 latent classes
+mod4_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1, link = "splines",
+                    ng = 4, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod4_ilr3_gs) # doesnt converge (but only from the second deriv criteria)
+
+# 5 latent classes
+mod5_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1, link = "splines",
+                    ng = 5, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+# summary(mod5_ilr3) # doesnt converge for all 3 criteria
+
+# 6 latent classes
+mod6_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    ng = 6, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod6_ilr) # doesnt converge (but only from the second deriv criteria)
+
+# 7 latent classes
+mod7_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    ng = 7, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod7_ilr) # doesnt converge (for likleihood and 2nd deriv criteria)
+
+# 8 latent classes
+mod8_ilr3_gs_s = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    ng = 8, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod8_ilr) # doesnt converge (but only from the second deriv criteria)
+
+# 9 latent classes
+mod9_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    ng = 9, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
+#summary(mod9_ilr) # doesnt converge (for likleihood and 2nd deriv criteria)
+
+# 10 latent classes
+mod10_ilr3_gs_s = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    ng = 10, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 ```
 
 ```{r classifications}
 # using 1- 4 latent classes
-mod2_ilr3$pprob
-mod3_ilr3_gs$pprob %>% filter(class == 2)
+mod2_ilr3$pprob %>% filter(class == 2)
+mod3_ilr3_gs$pprob
 mod4_ilr3_gs$pprob
 # look how subs from 2, 3, 4 latent classes are classified
 # first 2 col are the classifications
@@ -286,3 +353,9 @@ classifications = full_join(classifications, classed_4, by = "patient_id")
 
 classifications %>% group_by(class2,class3, class4) %>% summarise(n())
 ```
+
+```{r figures}
+plot(mod2_ilr3)
+plot(mod2_ilr3)
+```
+

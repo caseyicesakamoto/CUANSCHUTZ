@@ -154,7 +154,7 @@ describe(BONUS_Species$taxa_group)
 # =========================================== #
 ```
 
-```{r clr groups}
+```{r clr transf}
 # try a clr/ilr with the grouped
 # each sample identified by molecular id; data in long format 
 samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id)
@@ -234,11 +234,12 @@ hist(test_ilr$V4)
 
 ```
 
-```{r sbd groups}
+```{r sbc groups}
 #### THIS USED FOR THESIS PROPOSAL PRESENTATION;
 #### SKIP FOR ANALYSIS
 # if too many taxa, filter(perc_total > 5)
 # each sample identified by molecular id; data in long format 
+#
 samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id,perc_total, Patient, Age) 
 # need to compress similar cells
 groups_long = samples_long %>% group_by(taxa_group, molecular_id, Patient, Age) %>% summarise(seq_count = sum(seq_count), perc_total = sum(perc_total))
@@ -260,8 +261,8 @@ group_sbc = group_sbc +
   labs(title = "Change in Community Composition Within Subjects",
                                  x = "Age", 
                                  y = "Total Percent of Community")
-setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
-ggsave("grouped_sbc.png", plot = group_sbc, height = 70, width = 70, limitsize = FALSE)
+# setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
+# ggsave("grouped_sbc.png", plot = group_sbc, height = 70, width = 70, limitsize = FALSE)
 ```
 
 
@@ -286,6 +287,78 @@ describe(BONUS_lcmm$Num_Samples)
 # B503 has 2 age 5 measurements w/ diff ageccat but same mb
 # B 301 has 5 measurements w/ 6 recorded as num samples; is there one missing?
 BONUS_lcmm %>% filter(Num_Samples == 9)%>% group_by(Patient) %>% summarize(n()) # checking # of samples w num samples
+```
+```{r lc sbc}
+# this is to examine latent classes from analysis models 
+# DO NOT RUN
+# 2 latent class ilr model
+# second latent class
+subs = c("B029", "B046", "B122","B130","B211","B398",
+         "B440","B510","B606","B683","B791","B804","B829", "B941","B946","B964")
+samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id,perc_total, Patient, Age, agemos,Num_Samples) %>% filter(Num_Samples > 2) %>% filter(!(molecular_id == "C02613" & agemos < 4.8))
+# need to compress similar cells
+groups_long = samples_long %>% group_by(taxa_group, molecular_id, Patient, Age) %>% summarise(seq_count = sum(seq_count), perc_total = sum(perc_total))
+#
+bonus_groups = groups_long
+
+# position for barchart labels
+bonus_groups = groups_long %>% group_by(taxa_group) %>% mutate(pos = cumsum(perc_total) - (0.5)* perc_total)
+
+# latent classes
+bonus_groups1 = bonus_groups %>% filter(!(Patient %in% subs))
+bonus_groups2 = bonus_groups %>% filter(Patient %in% subs)
+# stack labels
+group1_sbc = ggplot(data = bonus_groups1,
+                     aes(x = Age, y = perc_total, fill = taxa_group, label = taxa_group)) + 
+  geom_bar(stat = "identity") + facet_wrap(~Patient)+
+  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+
+group1_sbc = group1_sbc + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Latent Class 1",
+                                 x = "Age", 
+                                 y = "Total Percent of Community")
+group2_sbc = ggplot(data = bonus_groups2,
+                     aes(x = Age, y = perc_total, fill = taxa_group, label = taxa_group)) + 
+  geom_bar(stat = "identity") + facet_wrap(~Patient)+
+  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+
+group2_sbc = group2_sbc + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Latent Class 2",
+                                 x = "Age", 
+                                 y = "Total Percent of Community")
+setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
+ggsave("class1_sbc.png", plot = group1_sbc, height = 40, width = 40, limitsize = FALSE)
+ggsave("class2_sbc.png", plot = group2_sbc, height = 10, width = 10, limitsize = FALSE)
+
+```
+
+```{r table 1}
+library(tableone)
+library(readxl)
+library(knitr)
+
+# only 3 obs used
+BONUS_table1 = BONUS_Species %>% select("Patient", "molecular_id","Age", "agemos",
+                                        "Num_Samples", "feed", "curr_on", "cum", "racecat",
+                                        "sex_std", "class", "enrollage", "pi", "mic_il", "on",
+                                        "weight", "length", "birthwt_kg", "birthlen_cm") %>% unique.data.frame() %>% filter(Num_Samples > 2) %>% filter(!(molecular_id == "C02613" & agemos < 4.8)) 
+
+# bonus t1 variables that dont need manip
+BT1 = BONUS_table1 %>% select(Patient, racecat, Num_Samples, sex_std, class, enrollage, pi, mic_il) %>% unique.data.frame()
+
+# max values (weight, length)
+# take patients final wt, len, subtract from birth meas
+BT1_growth = BONUS_table1 %>% select(Patient, Age,agemos, weight,
+                        length, birthwt_kg, birthlen_cm) %>% 
+  group_by(Patient)%>%mutate(maxage = max(Age)) %>% filter(Age == maxage) %>%
+  mutate(growth_wt = weight - birthwt_kg, growth_len = length - birthlen_cm) %>% select(Patient, growth_wt, growth_len)
+
+# feeding types
+BONUS_table1 %>% select(Patient, feed)  %>% mutate(feed_bf = ifelse)
 ```
 
 ```{r write csv}
