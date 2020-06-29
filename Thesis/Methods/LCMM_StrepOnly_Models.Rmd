@@ -83,47 +83,48 @@ postprob(clrmod_2_spl_2);postprob(clrmod_2_spl_3)
 ```
 ```{r clr 3 obs spline models}
 ##### clr models 3 obs, splines #####
+# better fit for m1 when using 3 quant splines vs splines
 # 1 lc
 clrmod_3_spl_1 = lcmm(Streptococcus ~ Age, random = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ) # converges
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ) # converges
 
 # 2 lc
 clrmod_3_spl_2 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 2, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1) # converges
 # 3 lc
 clrmod_3_spl_3 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 3, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 # 4 lc
 clrmod_3_spl_4 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 4, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 # 5 lc
 clrmod_3_spl_5 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 5, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 # 6 lc
 clrmod_3_spl_6 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 6, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 
 # 7 lc
 clrmod_3_spl_7 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 7, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 # 8 lc
 clrmod_3_spl_8 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 8, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 
 # 9 lc
 clrmod_3_spl_9 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 9, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 # 10 lc
 clrmod_3_spl_10 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 10, mixture = ~ 1,
-                    link = "splines", subject = "patient_id", data = BONUS_al3 ),
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 
 # summary stuff
