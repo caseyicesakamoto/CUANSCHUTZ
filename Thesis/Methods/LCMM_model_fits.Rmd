@@ -275,13 +275,14 @@ summary(mod5_ilr3_gs)
 ```
 splines methods dont converge
 ```{r models splines 3 obs}
-mod1_ilr3_s = multlcmm(V1 + V2 + V3 + V4 ~ Age,link = "splines",
-                    random = ~1,subject = "patient_id", data = BONUS_al3, maxiter = 300)
+mod1_ilr3_s = multlcmm(V1 + V2 + V3 + V4 ~ Age,link = "5-quant-splines",
+                    random = ~1,subject = "patient_id", data = BONUS_al3)
 summary(mod1_ilr3_s)
 
 # 2 latent classes
 mod2_ilr3_s = multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1, link = "splines", B = random(mod1_ilr3_s),
+                    random = ~1,subject = "patient_id", 
+                    mixture = ~1, link = "5-quant-splines", B = random(mod1_ilr3_s),
                     ng = 2, data = BONUS_al3)
 
 # 3 latent classes
@@ -293,47 +294,47 @@ mod2_ilr3_s = multlcmm(V1 + V2 + V3 + V4 ~ Age,
 
 # initial values gridsearched
 mod3_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1, link = "splines",
+                    random = ~1,subject = "patient_id", mixture = ~1, link = "5-quant-splines",
                     ng = 3, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 # 4 latent classes
 mod4_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1, link = "splines",
+                    random = ~1,subject = "patient_id", mixture = ~1, link = "5-quant-splines",
                     ng = 4, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 #summary(mod4_ilr3_gs) # doesnt converge (but only from the second deriv criteria)
 
 # 5 latent classes
 mod5_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1, link = "splines",
+                    random = ~1,subject = "patient_id", mixture = ~1, link = "5-quant-splines",
                     ng = 5, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 # summary(mod5_ilr3) # doesnt converge for all 3 criteria
 
 # 6 latent classes
 mod6_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "5-quant-splines",
                     ng = 6, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 #summary(mod6_ilr) # doesnt converge (but only from the second deriv criteria)
 
 # 7 latent classes
 mod7_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "5-quant-splines",
                     ng = 7, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 #summary(mod7_ilr) # doesnt converge (for likleihood and 2nd deriv criteria)
 
 # 8 latent classes
 mod8_ilr3_gs_s = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "5-quant-splines",
                     ng = 8, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 #summary(mod8_ilr) # doesnt converge (but only from the second deriv criteria)
 
 # 9 latent classes
 mod9_ilr3_gs_s  = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "5-quant-splines",
                     ng = 9, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 #summary(mod9_ilr) # doesnt converge (for likleihood and 2nd deriv criteria)
 
 # 10 latent classes
 mod10_ilr3_gs_s = gridsearch(multlcmm(V1 + V2 + V3 + V4 ~ Age,
-                    random = ~1,subject = "patient_id", mixture = ~1,link = "splines",
+                    random = ~1,subject = "patient_id", mixture = ~1,link = "5-quant-splines",
                     ng = 10, data = BONUS_al3), rep = 30, maxiter = 15, minit = mod1_ilr3)
 ```
 
