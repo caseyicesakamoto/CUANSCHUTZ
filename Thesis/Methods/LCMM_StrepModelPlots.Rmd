@@ -25,8 +25,8 @@ postprob(clrmod_3_spl_4) # looks like some of the big class is being split up
 
 #plotfit
 plot(clrmod_3_spl_4)
-plot(clrmod_3_spl_4, which = "fit", var.time = "Age",
-     xlab = "age", ylab = "normalized strep",  legend = NULL)
+plot(clrmod_3_spl_4, which = "fit", var.time = "agemos",
+     xlab = "age", ylab = "normalized strep", marg = FALSE,  legend = NULL)
 # prediction data set
 BONUS_LCMM_pred = data.frame(age = seq(1, 12, length = 200))
 ```
