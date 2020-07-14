@@ -218,18 +218,18 @@ dat_ilr = ilr(acomp(ra2))
 # clr
 groups_clr = as.data.frame(dat_clr)
 par(mfrow = c(2,3))
-hist(test_clr$Veillonella)
-hist(test_clr$Streptococcus)
-hist(test_clr$Prevotella)
-hist(test_clr$Neisseria)
-hist(test_clr$Other)
+# hist(test_clr$Veillonella)
+# hist(test_clr$Streptococcus)
+# hist(test_clr$Prevotella)
+# hist(test_clr$Neisseria)
+# hist(test_clr$Other)
 # ilr
 groups_ilr = as.data.frame(dat_ilr)
-par(mfrow = c(2,2))
-hist(test_ilr$V1)
-hist(test_ilr$V2)
-hist(test_ilr$V3)
-hist(test_ilr$V4)
+# par(mfrow = c(2,2))
+# hist(test_ilr$V1)
+# hist(test_ilr$V2)
+# hist(test_ilr$V3)
+# hist(test_ilr$V4)
 
 
 ```
@@ -278,15 +278,15 @@ setDT(groups_ilr, keep.rownames = "molecular_id")[]
 # Select Age (cts&cat), MolecularID, Patient ID
 # antibiotics, genotype, feeding types, growth seem likely to include
 # including Num_samples to decide whether to include those with < 3 visits
-BONUS_lcmm = BONUS_Species %>% select("Patient", "molecular_id",
-                                      "Age", "agemos", "Num_Samples") %>% unique.data.frame()
+BONUS_lcmm = BONUS_Species %>% select("Patient", "molecular_id","class", "sex_std","mic_il","curr_on", "cum","feed",
+                                      "Age", "agemos", "Num_Samples", "X_zwei", "X_zlen", "on", "age_firstabx") %>% unique.data.frame()
 BONUS_lcmm = full_join(BONUS_lcmm, groups_clr, by= "molecular_id")
 BONUS_lcmm = full_join(BONUS_lcmm, groups_ilr, by = "molecular_id")
 
-describe(BONUS_lcmm$Num_Samples)
+#describe(BONUS_lcmm$Num_Samples)
 # B503 has 2 age 5 measurements w/ diff ageccat but same mb
 # B 301 has 5 measurements w/ 6 recorded as num samples; is there one missing?
-BONUS_lcmm %>% filter(Num_Samples == 9)%>% group_by(Patient) %>% summarize(n()) # checking # of samples w num samples
+BONUS_lcmm %>% filter(Num_Samples == 9)%>% group_by(Patient) %>% summarise(n()) # checking # of samples w num samples
 ```
 ```{r lc sbc}
 # this is to examine latent classes from analysis models 

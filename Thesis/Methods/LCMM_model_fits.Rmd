@@ -13,7 +13,7 @@ library(Hmisc)
 BONUS_lcmm <- read.csv("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_lcmm.csv")
 
 # NUMERIC ID
-BONUS_lcmm = BONUS_lcmm %>% select(-X) %>% mutate(patient_id = as.numeric(str_sub(Patient,start=2)))
+BONUS_lcmm = BONUS_lcmm  %>% mutate(patient_id = as.numeric(str_sub(Patient,start=2)))
 ```
 NOTE: WE NEED TO CONVERT SUBID TO NUMERIC? IDK WHY BUT SPITTING OUT AN ERROR FOR ME WHEN FITTING MODELS
 
