@@ -15,10 +15,10 @@ library(tidyverse)
 library(tableone)
 library(readxl)
 library(knitr)
-#outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/DataSets/Microbiome Brandie 2019-2020/outpatient2020_01_25.csv")
-#cult3 <- read_excel("D:/DataSets/Microbiome Brandie 2019-2020/cult3.xlsx")
-outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/research/20200128plots/outpatient2020_01_25.csv")
-cult3 <- read_excel("C:/Users/Casey/Desktop/research/cult3.xlsx")
+outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/DataSets/Microbiome Brandie 2019-2020/outpatient2020_01_25.csv")
+cult3 <- read_excel("D:/DataSets/Microbiome Brandie 2019-2020/cult3.xlsx")
+#outpatient2020_01_25 <- read.csv("C:/Users/Casey/Desktop/research/20200128plots/outpatient2020_01_25.csv")
+#cult3 <- read_excel("C:/Users/Casey/Desktop/research/cult3.xlsx")
 # age, gender, base fev1% (m r), fev1 pred(mr)
 # change pred fev (mr), v1 pes score, days between visit (mr)
 # ? genotyp, cf resp culture v1, positie viral pcr
@@ -128,8 +128,8 @@ wilcox.test(df_v1$lq_all, df_v2$lq_all, paired = TRUE)
 # 
 
 rm(df_v1,df_v2,unique_df)
-
-#write.csv(patient_t1_df, "patient_t1_df.csv")
+setwd("C:/Users/Casey/Desktop/WorkData/Microbiome Brandie 2019-2020")
+write.csv(patient_t1_df, "patient_t1_df.csv")
 ```
 
 

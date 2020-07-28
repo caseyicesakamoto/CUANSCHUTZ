@@ -1,0 +1,391 @@
+---
+title: "Thesis Code Prelim"
+author: "Casey Sakamoto"
+date: "5/5/2020"
+output: pdf_document
+---
+For Preliminary Data Analysis and Cleaning
+```{r setup, include=FALSE}
+# libraries
+library(Hmisc)
+library(tidyverse)
+library(compositions)
+library(lcmm)
+library(data.table)
+# data
+BONUS_Species <- read.delim("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_Species.txt")
+```
+
+```{r summaries, eval = F, include=F}
+# INITIAL DATA EXPlORE/ UNGROUPED SBC
+# SKIP THIS CHUNK WHILE PERFORMING ANALYSIS
+describe(BONUS_Species)
+# 22 distinct phyla, 550 last; tons of 0's up to 90th pctl
+
+##### Stack Barchart ######
+bonus_cutoff5 = BONUS_Species %>% filter(perc_total > 5)
+
+# position for barchart labels
+bonus_cutoff5 = bonus_cutoff5 %>% group_by(last) %>% mutate(pos = cumsum(perc_total) - (0.5)* perc_total)
+
+# stack labels
+taxa_sbc_c5 = ggplot(data = bonus_cutoff5,
+                     aes(x = month, y = perc_total, fill = last, label = last)) + 
+  geom_bar(stat = "identity") + facet_wrap(~Patient)+
+  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+
+taxa_sbc_c5 = taxa_sbc_c5 + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Change in Community Composition Within Subjects",
+                                 x = "Visit", 
+                                 y = "Total Percent of Community")
+setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
+ggsave("20200505testexpl_sbc.png", plot = taxa_sbc_c5, height = 70, width = 70, limitsize = FALSE)
+# ================================================================ #
+```
+
+```{r clr test code, eval = F, include=F}
+# this chunk to confirm the code works
+# SKIP THIS CHUNK WHEN PERFORMING ANALYSIS
+# each sample identified by molecular id; data in long format 
+samples_long = BONUS_Species %>% select(OTU_Name, seq_count, molecular_id)
+samples_wide = samples_long %>% spread(key = molecular_id, value = seq_count)
+
+# convert to numeric cells from factor format
+matrix.dat = data.matrix(samples_wide[,-1])
+rownames(matrix.dat) = samples_wide[,1]
+
+#calculate number of samples
+n_samp <- ncol(matrix.dat)
+n_samp
+
+#calculate number of taxa
+n_org <- nrow(matrix.dat)
+n_org
+
+#generate matrix of counts
+counts <- matrix.dat
+#generate vector of total counts
+total <- apply(counts,2,sum)
+
+#define matrices
+ra <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+l_ra <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+clr <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+gm <- rep(0,n_samp)
+c <- rep(0,n_samp)
+
+for (i in 1:n_samp) {
+               #calc weight
+               c[i] <- 1/total[i]
+
+               for (j in 1:n_org) {
+               #transform counts to relative abundance and add small amount and log transform
+               ra[j,i] <- (counts[j,i]+c[i])/(total[i]+c[i]*n_org)
+               l_ra[j,i] <- log(ra[j,i])
+               }
+               #calculate gm
+               gm[i]=mean(l_ra[ ,i])
+               clr[ ,i] <- l_ra[ ,i] - gm[i]
+}
+
+
+#verify this code gives same result as compositions package
+ra2=t(ra)
+dat_clr= clr(acomp(ra2))
+dat_ilr= ilr(acomp(ra2))
+dat_clr[1,]
+clr[,1]
+hist(dat_clr[1,]);hist(clr[,1])
+
+# both clr and ilr look pretty bad w/ so much 0's
+```
+
+For grouping, when looking at counts, Strep should definitely be a group; 
+```{r grouping, eval = F, include=F}
+###### Check which groupings make some sense #############
+# lets check RA of the taxa to motivate the groupings:
+BSG = BONUS_Species %>% select(OTU_Name, seq_count, perc_total, molecular_id) 
+
+counts = BSG %>% group_by(OTU_Name) %>% summarise(sum_sc = sum(seq_count))
+# 153 million counts total
+total_ct = sum(counts$sum_sc)
+
+# prelim groupings
+counts$OTU_Name = as.character(counts$OTU_Name)
+counts = counts %>% mutate(taxa_group = case_when(grepl("Veillonella", OTU_Name) ~ "Veillonella",
+                                                  grepl("Streptococcus", OTU_Name) ~ "Streptococcus",
+                                                  grepl("Prevotella", OTU_Name) ~ "Prevotella",
+                                                  grepl("Neisseria", OTU_Name) ~ "Neisseria",
+                                                  TRUE ~ OTU_Name))
+# compress same groups into one
+counts = counts %>% group_by(taxa_group) %>% summarise(sum_sc = sum(sum_sc))
+
+# percent of total sequence data
+# strep 
+strep = counts %>% filter(taxa_group == "Streptococcus") %>% select(sum_sc)
+strep/total_ct # makes up 51% of the counts
+
+# veil
+veil = counts %>% filter(taxa_group == "Veillonella") %>% select(sum_sc)
+veil/total_ct
+
+# neis
+neis = counts %>% filter(taxa_group == "Neisseria") %>% select(sum_sc)
+neis/total_ct
+
+# prev
+prev = counts %>% filter(taxa_group == "Prevotella") %>% select(sum_sc)
+prev/total_ct
+# =========== #
+######## Create Groupings #############
+# create groupings
+BONUS_Species =  BONUS_Species %>% mutate(taxa_group = case_when(grepl("Veillonella", OTU_Name) ~ "Veillonella",
+                                                                 grepl("Streptococcus", OTU_Name) ~ "Streptococcus",
+                                                                 grepl("Prevotella", OTU_Name) ~ "Prevotella",
+                                                                 grepl("Neisseria", OTU_Name) ~ "Neisseria",
+                                                                 TRUE ~ "Other"))
+
+# 9 species Veill, 20 Strep, 14 Prev 
+BONUS_Species %>% group_by(molecular_id, Age) %>% summarise(sum_v = sum(grepl("Prevotella", OTU_Name)))
+# 92% other; 2.5% Prev; 3.6% Strep, 1.6% Veil
+describe(BONUS_Species$taxa_group)
+# =========================================== #
+```
+
+```{r clr transf, eval = F, include=F}
+# try a clr/ilr with the grouped
+# each sample identified by molecular id; data in long format 
+samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id)
+# need to compress similar cells
+groups_long = samples_long %>% group_by(taxa_group, molecular_id) %>% summarise(seq_count = sum(seq_count))
+# convert to wide format  
+groups_wide = groups_long %>% spread(key = molecular_id, value = seq_count)
+
+# convert to numeric cells from factor format
+matrix.dat = data.matrix(groups_wide[,-1])
+# for some reason this isnt working
+# rownames(matrix.dat) = groups_wide[,1]
+
+#calculate number of samples
+n_samp <- ncol(matrix.dat)
+n_samp
+
+#calculate number of taxa
+n_org <- nrow(matrix.dat)
+n_org
+
+#generate matrix of counts
+counts <- matrix.dat
+#generate vector of total counts
+total <- apply(counts,2,sum)
+
+#define matrices
+ra <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+l_ra <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+clr <- matrix (rep(0,n_org*n_samp), n_org,n_samp)
+gm <- rep(0,n_samp)
+c <- rep(0,n_samp)
+
+for (i in 1:n_samp) {
+               #calc weight
+               c[i] <- 1/total[i]
+
+               for (j in 1:n_org) {
+               #transform counts to relative abundance and add small amount and log transform
+               ra[j,i] <- (counts[j,i]+c[i])/(total[i]+c[i]*n_org)
+               l_ra[j,i] <- log(ra[j,i])
+               }
+               #calculate gm
+               gm[i]=mean(l_ra[ ,i])
+               clr[ ,i] <- l_ra[ ,i] - gm[i]
+}
+
+
+#verify this code gives same result as compositions package
+ra2=t(ra)
+rownames(ra2) = colnames(groups_wide[,-1])
+colnames(ra2) = groups_wide$taxa_group
+dat = clr(acomp(ra2))
+dat[1,]
+clr[,1]
+
+# look at groups
+dat_clr = clr(acomp(ra2))
+dat_ilr = ilr(acomp(ra2))
+# explore this set
+# clr
+groups_clr = as.data.frame(dat_clr)
+par(mfrow = c(2,3))
+# hist(test_clr$Veillonella)
+# hist(test_clr$Streptococcus)
+# hist(test_clr$Prevotella)
+# hist(test_clr$Neisseria)
+# hist(test_clr$Other)
+# ilr
+groups_ilr = as.data.frame(dat_ilr)
+# par(mfrow = c(2,2))
+# hist(test_ilr$V1)
+# hist(test_ilr$V2)
+# hist(test_ilr$V3)
+# hist(test_ilr$V4)
+
+
+```
+
+```{r sbc groups, eval=F, include=F}
+#### THIS USED FOR THESIS PROPOSAL PRESENTATION;
+#### SKIP FOR ANALYSIS
+# if too many taxa, filter(perc_total > 5)
+# each sample identified by molecular id; data in long format 
+#
+samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id,perc_total, Patient, Age) 
+# need to compress similar cells
+groups_long = samples_long %>% group_by(taxa_group, molecular_id, Patient, Age) %>% summarise(seq_count = sum(seq_count), perc_total = sum(perc_total))
+#
+bonus_groups = groups_long
+
+# position for barchart labels
+bonus_groups = groups_long %>% group_by(taxa_group) %>% mutate(pos = cumsum(perc_total) - (0.5)* perc_total)
+
+# stack labels
+group_sbc = ggplot(data = bonus_groups,
+                     aes(x = Age, y = perc_total, fill = taxa_group, label = taxa_group)) + 
+  geom_bar(stat = "identity") + facet_wrap(~Patient)+
+  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+
+group_sbc = group_sbc + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Change in Community Composition Within Subjects",
+                                 x = "Age", 
+                                 y = "Total Percent of Community")
+# setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
+# ggsave("grouped_sbc.png", plot = group_sbc, height = 70, width = 70, limitsize = FALSE)
+```
+
+
+First Iteration I'm trying 4 groups (Neis, Strep, Prev, Veil, Other) CLR and ILR: 6-17-2020
+```{r Analysis Dataset, eval=F, include=F}
+# This chunk to create the analysis dataset
+# will update to include covariates for secondary analyses
+
+# clr, ilr groups into dataframes w/ molecular id col
+setDT(groups_clr, keep.rownames = "molecular_id")[]
+setDT(groups_ilr, keep.rownames = "molecular_id")[]
+
+# Select Age (cts&cat), MolecularID, Patient ID
+# antibiotics, genotype, feeding types, growth seem likely to include
+# including Num_samples to decide whether to include those with < 3 visits
+BONUS_lcmm = BONUS_Species %>% select("Patient", "molecular_id","class", "sex_std","mic_il","curr_on", "cum","feed",
+                                      "Age", "agemos", "Num_Samples", "X_zwei", "X_zlen", "on", "age_firstabx") %>% unique.data.frame()
+BONUS_lcmm = full_join(BONUS_lcmm, groups_clr, by= "molecular_id")
+BONUS_lcmm = full_join(BONUS_lcmm, groups_ilr, by = "molecular_id")
+
+#describe(BONUS_lcmm$Num_Samples)
+# B503 has 2 age 5 measurements w/ diff ageccat but same mb
+# B 301 has 5 measurements w/ 6 recorded as num samples; is there one missing?
+BONUS_lcmm %>% filter(Num_Samples == 9)%>% group_by(Patient) %>% summarise(n()) # checking # of samples w num samples
+```
+```{r lc sbc, eval = F, include=F}
+# this is to examine latent classes from analysis models 
+# DO NOT RUN
+# 2 latent class ilr model
+# second latent class
+subs = c("B029", "B046", "B122","B130","B211","B398",
+         "B440","B510","B606","B683","B791","B804","B829", "B941","B946","B964")
+samples_long = BONUS_Species %>% select(taxa_group, seq_count, molecular_id,perc_total, Patient, Age, agemos,Num_Samples) %>% filter(Num_Samples > 2) %>% filter(!(molecular_id == "C02613" & agemos < 4.8))
+# need to compress similar cells
+groups_long = samples_long %>% group_by(taxa_group, molecular_id, Patient, Age) %>% summarise(seq_count = sum(seq_count), perc_total = sum(perc_total))
+#
+bonus_groups = groups_long
+
+# position for barchart labels
+bonus_groups = groups_long %>% group_by(taxa_group) %>% mutate(pos = cumsum(perc_total) - (0.5)* perc_total)
+
+# latent classes
+bonus_groups1 = bonus_groups %>% filter(!(Patient %in% subs))
+bonus_groups2 = bonus_groups %>% filter(Patient %in% subs)
+# stack labels
+group1_sbc = ggplot(data = bonus_groups1,
+                     aes(x = Age, y = perc_total, fill = taxa_group, label = taxa_group)) + 
+  geom_bar(stat = "identity") + facet_wrap(~Patient)+
+  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+
+group1_sbc = group1_sbc + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Latent Class 1",
+                                 x = "Age", 
+                                 y = "Total Percent of Community")
+group2_sbc = ggplot(data = bonus_groups2,
+                     aes(x = Age, y = perc_total, fill = taxa_group, label = taxa_group)) + 
+  geom_bar(stat = "identity") + facet_wrap(~Patient)+
+  geom_text(size = 3 , position = position_stack(vjust = 0.5)) 
+
+group2_sbc = group2_sbc + 
+  theme_classic()+
+  theme(legend.position = "none")+
+  labs(title = "Latent Class 2",
+                                 x = "Age", 
+                                 y = "Total Percent of Community")
+setwd("D:/Repositories/CUANSCHUTZ/Thesis/Methods")
+ggsave("class1_sbc.png", plot = group1_sbc, height = 40, width = 40, limitsize = FALSE)
+ggsave("class2_sbc.png", plot = group2_sbc, height = 10, width = 10, limitsize = FALSE)
+
+```
+
+```{r table 1,echo=F}
+library(tableone)
+library(readxl)
+library(knitr)
+
+# only 3 obs used
+BONUS_table1 = BONUS_Species %>% select("Patient", "molecular_id","Age", "agemos",
+                                        "Num_Samples", "feed", "curr_on", "cum", "racecat",
+                                        "sex_std", "class", "enrollage", "pi", "mic_il", "on",
+                                        "weight", "length", "birthwt_kg", "birthlen_cm", "age_firstabx") %>% unique.data.frame() %>% filter(Num_Samples > 2) %>% filter(!(molecular_id == "C02613" & agemos < 4.8)) 
+
+# bonus t1 variables that dont need manip
+BT1 = BONUS_table1 %>% select(Patient, racecat, Num_Samples, sex_std, class, enrollage, pi, mic_il, age_firstabx, birthwt_kg, birthlen_cm) %>% unique.data.frame()
+
+# set up t1 w variables
+t1_vars = c("enrollage","age_firstabx","Num_Samples", "racecat", "sex_std", "class",  "mic_il", "birthwt_kg", "birthlen_cm")
+t1_catvars = c("racecat", "sex_std", "class",  "mic_il")
+
+# create t1
+table1 = print(CreateTableOne(vars = t1_vars, factorVars = t1_catvars, data = BT1, test = FALSE), showAllLevels = TRUE, nonnormal = TRUE)
+t1_rownames = c("n", "Enrollment Age (Median[IQR])", "Age First Antibiotics (Median[IQR])", "Number of Samples (Median[IQR])", "Race (n(%))", "", "", "", "",
+                "Sex (n(%))","","Mutation Classification (n(%))","","","","Positive Meconium Ileus (n(%))","Birthweight(kg) (Median[IQR])", "Birthlength(cm) (Median[IQR])")
+t1_colnames = c("","n = 192")
+rownames(table1) = t1_rownames
+colnames(table1) = t1_colnames
+
+# replace number ccoding with 
+table1 = table1[-1,]
+table1[4,1] = "Caucausian"
+table1[5,1] = "Black"
+table1[6,1] = "Hispanic"
+table1[7,1] = "American Indian"
+table1[8,1] = "Asian"
+table1[9,1] = "Male"
+table1[10,1] = "Female"
+table1[11,1] = "Low Risk (at least 1 Class IV-V)"
+table1[12,1] = "Unknown (I-III + unidentified)"
+table1[13,1] = "High Risk (two classes I-III)"
+table1[14,1] = "" #negatives
+table1[15,1] = "" #positives
+
+table1= table1[-14,]
+# table 1
+kable(table1, caption = "Patient Characteristics at Baseline")
+```
+
+```{r write csv, eval=F, include=F}
+# save this dataset for analysis
+# save to folder NOT in git repo
+
+setwd("C:/Users/Casey/Desktop/WorkData") # desktop
+write.csv(BONUS_lcmm, "BONUS_lcmm.csv")
+```

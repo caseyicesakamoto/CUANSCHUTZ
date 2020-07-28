@@ -1,0 +1,99 @@
+---
+title: "Strep Model Plots"
+author: "Casey Sakamoto"
+date: "7/1/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# load packages
+library(tidyverse)
+library(lcmm)
+library(ggalluvial) # visualizing the class movements
+library(Hmisc)
+# load in models from strep models
+load("~/strep_5quantsplines.RData")
+describe(BONUS_al3$Age)
+describe(BONUS_al3$agemos)
+describe(BONUS_al3$X_zlen)
+describe(BONUS_al3$Streptococcus)
+```
+
+```{r trajectories}
+# look at the trajectories of the 4 lc fit in the splines model
+postprob(clrmod_3_spl_2)
+postprob(clrmod_3_spl_3) # splits up class 2 into two parts; class 1 in prev model = class 2 in this
+postprob(clrmod_3_spl_4) # looks like some of the big class is being split up
+
+#plotfit
+plot(clrmod_3_spl_4)
+
+# class 1 n = 30 black, 2 n = 4 red, 3n = 103 green, 4n = 55 blue
+
+plot(clrmod_3_spl_4, which = "fit", var.time = "Age",
+     xlab = "age", ylab = "normalized strep",  bty = "l", break.times = c(1,2,3,4,5,6,8,10,12), ylim = c(-6,2.5))
+# posterior probabilities
+postprob(clrmod_3_spl_4)
+
+# predicted trajectories
+data_pred = data.frame(Age=seq(1,12, length.out = 100))
+pred = predictY(clrmod_3_spl_4, data_pred, var.time = "Age", break.times = c(1,2,3,4,5,6,8,10,12))
+plot(pred)
+```
+
+```{r alluvial}
+classes2 = clrmod_3_spl_2$pprob[,1:2] %>% rename(class2 = class) # to get the classes for alluvial plots
+classes3 = clrmod_3_spl_3$pprob[,1:2] %>% rename(class3 = class)
+classes4 = clrmod_3_spl_4$pprob[,1:2] %>% rename(class4 = class)
+
+# make data frame for the classes
+alluvial_df = full_join(classes2, classes3, by = "patient_id")
+alluvial_df = full_join(alluvial_df, classes4, by = "patient_id")
+
+# put into aluvial form
+alluvial_df = alluvial_df %>% group_by(class2,class3,class4) %>% summarise( freq=n())
+is_alluvia_form(alluvial_df, silent = T)
+
+# ggplot
+lc_alluvial = ggplot(alluvial_df, aes(y = freq, axis1 = as.factor(class2), axis2 = as.factor(class3), axis3 = as.factor(class4))) + 
+  geom_alluvium(aes(fill = as.factor(class4)),width = 1/20) + geom_stratum(width = 1/6, alpha = 0.5) +
+  geom_label(stat = "stratum",infer.label = TRUE) + scale_x_discrete(limits = c("2 LC", "3 LC", "4 LC"), expand = c(0.05, 0.05)) + 
+  scale_fill_brewer(type = "qual", palette = "Dark2") + ggtitle("Latent Class Models 2-4") + theme_classic()
+
+### need to look at what the trajectories are like and assign labels to the groups to better understand what is happening
+lc_alluvial
+
+setwd("C:/Users/Casey/Desktop/WorkData/Thesis 2020")
+ggsave("lcmm_alluvial.png", plot = lc_alluvial, width = 9, height = 7)
+```
+
+```{r covariate models}
+# base model using only age
+# clrmod_3_spl_4 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 4, mixture = ~ 1,
+#                     link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
+#                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
+
+# covariates we are interested in:
+# constant over time: Class: genotype (class) gender (sex_std) meconium ileus (mic_il) age first abx (Age_firstabx)
+# time varying: Feeding type (Feed), weight& height zscore (X_zwei, X_zlen), abx status (curr_on), # abx on (On), cumulative abx days (cum)
+describe(BONUS_al3)
+# cts
+pairs(~Streptococcus+X_zwei+X_zlen+age_firstabx + cum, data = BONUS_al3) # zwei & zlen correlated. might use just one
+stats::cor(BONUS_al3$X_zlen, BONUS_al3$X_zwei, use = "complete.obs", method = "spearman") # 0.7 corr
+stats::cor(BONUS_al3$Streptococcus, BONUS_al3$X_zwei, use = "complete.obs",  method = "spearman") # 0.27
+stats::cor(BONUS_al3$Streptococcus, BONUS_al3$X_zlen, use = "complete.obs", method = "spearman") # 0.13
+
+# we'll use weight?
+# discrete
+pairs(Streptococcus~ class + sex_std + mic_il + curr_on + on + feed, data = BONUS_al3)
+
+
+### model
+cov_init_mod = lcmm(Streptococcus ~ Age + factor(class) + factor(sex_std) + factor(mic_il) + age_firstabx + feed + X_zwei + factor(curr_on) + on + cum, random = ~ 1, ng = 1,
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3)
+model_aim2 = gridsearch(lcmm(Streptococcus ~ Age + factor(class) + factor(sex_std) + factor(mic_il) + age_firstabx + feed + X_zwei + factor(curr_on) + on + cum, random = ~ 1, ng = 4, mixture = ~ 1,
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
+                    rep = 30, maxiter = 15, minit = cov_init_mod)
+summary(model_aim2)
+plot(model_aim2, which = "fit", var.time = "Age", break.times = c(1,2,3,4,5,6,8,10,12),legend = NULL)
+```
