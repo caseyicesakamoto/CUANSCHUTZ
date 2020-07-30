@@ -7,10 +7,10 @@ output: pdf_document
 For Preliminary Data Analysis and Cleaning
 ```{r setup, include=FALSE}
 # libraries
-library(Hmisc)
+#library(Hmisc)
 library(tidyverse)
 library(compositions)
-library(lcmm)
+#library(lcmm)
 library(data.table)
 # data
 BONUS_Species <- read.delim("C:/Users/Casey/Desktop/WorkData/Thesis 2020/BONUS_Species.txt")
