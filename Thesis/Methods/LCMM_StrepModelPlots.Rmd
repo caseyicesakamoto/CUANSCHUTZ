@@ -85,7 +85,7 @@ stats::cor(BONUS_al3$Streptococcus, BONUS_al3$X_zlen, use = "complete.obs", meth
 
 # we'll use weight?
 # discrete
-pairs(Streptococcus~ class + sex_std + mic_il + curr_on + on + feed, data = BONUS_al3)
+pairs(Streptococcus~ class + sex_std + cum + curr_on + on + feed, data = BONUS_al3)
 
 
 ### model
@@ -100,14 +100,22 @@ plot(model_aim2, which = "fit", var.time = "Age", break.times = c(1,2,3,4,5,6,8,
 
 
 ```{r feeding figures}
-BONUS_al3 %>% group_by(feed, Age,class4) %>% summarise(n = n())
+
 # put lc in feeding data set
 classes4 = clrmod_3_spl_4$pprob[,1:2] %>% rename(class4 = class)
 BONUS_al3 = full_join(BONUS_al3, classes4, by = "patient_id")
-
+BONUS_al3 %>% group_by(feed, Age,class4) %>% summarise(n = n())
 # scatter for strep v age w/ curve for fdg type?
 feed_scatter = ggplot(aes(x = Age, y = Streptococcus, group = Patient), data = BONUS_al3) + facet_wrap(~class4) + geom_point(aes(shape = feed, color = feed)) #+ geom_line(aes(color = feed))
 
+# feed barchart
+feed_bar_1 = ggplot(aes(x = factor(class4), fill = factor(feed)),data = BONUS_al3) + facet_wrap(~factor(Age)) + geom_bar(position = "fill") +
+  labs(title = "Feeding Types by Age and Latent Class", x = "Latent Class", y = "Proportion" ) + scale_fill_discrete(name = "Feeding Type")
+feed_bar_1
+
+feed_bar_2 = ggplot(aes(x = factor(feed), fill = factor(class4)),data = BONUS_al3) + facet_wrap(~factor(Age)) + geom_bar(position = "fill") 
+feed_bar_2
 setwd("C:/Users/Casey/Desktop")
 ggsave("feed_scatter.png",plot = feed_scatter, height = 10, width = 10)
+ggsave("feed_bar.png",plot = feed_bar, height = 10, width = 10)
 ```
