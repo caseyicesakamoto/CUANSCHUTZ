@@ -12,7 +12,7 @@ library(lcmm)
 library(ggalluvial) # visualizing the class movements
 library(Hmisc)
 # load in models from strep models
-load("~/strep_5quantsplines.RData")
+load("C:/Users/Casey/Desktop/FinalStrep.RData")
 describe(BONUS_al3$Age)
 describe(BONUS_al3$agemos)
 describe(BONUS_al3$X_zlen)
@@ -20,6 +20,7 @@ describe(BONUS_al3$Streptococcus)
 ```
 
 ```{r trajectories}
+summarytable(clrmod_3_spl_1,clrmod_3_spl_2,clrmod_3_spl_3,clrmod_3_spl_4, which = c("G", "loglik", "npm", "AIC", "BIC", "%class"))
 # look at the trajectories of the 4 lc fit in the splines model
 postprob(clrmod_3_spl_2)
 postprob(clrmod_3_spl_3) # splits up class 2 into two parts; class 1 in prev model = class 2 in this
@@ -39,6 +40,8 @@ postprob(clrmod_3_spl_4)
 data_pred = data.frame(Age=seq(1,12, length.out = 100))
 pred = predictY(clrmod_3_spl_4, data_pred, var.time = "Age", break.times = c(1,2,3,4,5,6,8,10,12))
 plot(pred)
+
+describe(BONUS_al3$Streptococcus)
 ```
 
 ```{r alluvial}
@@ -68,14 +71,40 @@ ggsave("lcmm_alluvial.png", plot = lc_alluvial, width = 9, height = 7)
 ```
 
 ```{r covariate models}
-# base model using only age
-# clrmod_3_spl_4 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ 1, ng = 4, mixture = ~ 1,
-#                     link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
-#                     rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
 
+# merge groups with data frame
+merger = clrmod_3_spl_4$pprob[,1:2]
+colnames(merger) = c("patient_id", "latent_class")
+BONUS_al3 = full_join(merger, BONUS_al3, by = "patient_id"); rm(merger)
+# base model using only age
 # covariates we are interested in:
 # constant over time: Class: genotype (class) gender (sex_std) meconium ileus (mic_il) age first abx (Age_firstabx)
 # time varying: Feeding type (Feed), weight& height zscore (X_zwei, X_zlen), abx status (curr_on), # abx on (On), cumulative abx days (cum)
+
+#problems fitting lcmm w covariates so we'll do a second stage analysis comparing covariates across groups for selection
+# weight
+summary(aov(latent_class~X_zwei,data = BONUS_al3)) # significant 
+# gender
+chisq.test(table(BONUS_al3$latent_class, BONUS_al3$sex_std)) # sig
+# genotype
+chisq.test(table(BONUS_al3$latent_class, BONUS_al3$class)) # sig
+# mic_il
+chisq.test(table(BONUS_al3$latent_class, BONUS_al3$mic_il)) # sig
+# age first abx
+summary(aov(latent_class~age_firstabx,data = BONUS_al3)) # significant
+# feed
+chisq.test(table(BONUS_al3$latent_class, BONUS_al3$feed)) # sig
+# abx status
+chisq.test(table(BONUS_al3$latent_class, BONUS_al3$curr_on)) # sig
+# number abx on
+summary(aov(latent_class~on,data = BONUS_al3)) # not significant
+# cumulative abx days
+summary(aov(latent_class~cum,data = BONUS_al3)) # not significant
+
+#looks like important ones are gender, weight, genotype, meconium ileus, age first abx, feed, abx status
+
+
+#######
 describe(BONUS_al3)
 # cts
 pairs(~Streptococcus+X_zwei+X_zlen+age_firstabx + cum, data = BONUS_al3) # zwei & zlen correlated. might use just one
@@ -89,11 +118,14 @@ pairs(Streptococcus~ class + sex_std + cum + curr_on + on + feed, data = BONUS_a
 
 
 ### model
-cov_init_mod = lcmm(Streptococcus ~ Age + factor(class) + factor(sex_std) + factor(mic_il) + age_firstabx + feed + X_zwei + factor(curr_on) + on + cum, random = ~ 1, ng = 1,
-                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3)
-model_aim2 = gridsearch(lcmm(Streptococcus ~ Age + factor(class) + factor(sex_std) + factor(mic_il) + age_firstabx + feed + X_zwei + factor(curr_on) + on + cum, random = ~ 1, ng = 4, mixture = ~ 1,
-                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
-                    rep = 30, maxiter = 15, minit = cov_init_mod)
+# model the right way? doesnt converge with 30 rep at 15 iter, going to try and up it to see if it converges
+# with up to 50 and 200 models take 20 sec per iter and doenst meet 2nd deriv or lieklihood criteria
+cov_init_mod = lcmm(Streptococcus ~ Age + factor(class) + factor(sex_std) + factor(mic_il) + age_firstabx + curr_on +  feed + X_zwei,
+                    random = ~ Age, ng = 1, link = "5-quant-splines", subject = "patient_id", data = BONUS_al3)
+# runs with class
+model_aim2 = gridsearch(lcmm(Streptococcus ~ Age + factor(class) + factor(sex_std) + factor(mic_il) + age_firstabx + curr_on +  feed + X_zwei,
+                             random = ~ Age, ng = 4, mixture = ~Age, link = "5-quant-splines", subject = "patient_id", data = BONUS_al3),
+                        rep = 15, maxiter =30, minit = cov_init_mod)
 summary(model_aim2)
 plot(model_aim2, which = "fit", var.time = "Age", break.times = c(1,2,3,4,5,6,8,10,12),legend = NULL)
 ```

@@ -217,3 +217,19 @@ summarytable(clrmod_3_splc_1,clrmod_3_splc_2,clrmod_3_splc_3,clrmod_3_splc_4,clr
 
 ```
 
+```{r clr  better traj}
+# fitting w age in mixture and random
+clrmod_3_spl_1 = lcmm(Streptococcus ~ Age, random = ~ Age,
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3) # converges
+
+clrmod_3_spl_2 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ Age, ng = 2, mixture = ~ Age,
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
+                    rep = 30, maxiter = 15, minit = clrmod_3_spl_1) # converges
+clrmod_3_spl_3 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ Age, ng = 3, mixture = ~ Age,
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
+                    rep = 30, maxiter = 15, minit = clrmod_3_spl_1) # converges
+clrmod_3_spl_4 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ Age, ng = 4, mixture = ~ Age,
+                    link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),
+                    rep = 30, maxiter = 15, minit = clrmod_3_spl_1)
+
+```
