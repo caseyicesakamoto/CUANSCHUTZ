@@ -221,6 +221,7 @@ summarytable(clrmod_3_splc_1,clrmod_3_splc_2,clrmod_3_splc_3,clrmod_3_splc_4,clr
 # fitting w age in mixture and random
 clrmod_3_spl_1 = lcmm(Streptococcus ~ Age, random = ~ Age,
                     link = "5-quant-splines", subject = "patient_id", data = BONUS_al3) # converges
+summary(clrmod_3_spl_1)
 
 clrmod_3_spl_2 = gridsearch(lcmm(Streptococcus ~ Age, random = ~ Age, ng = 2, mixture = ~ Age,
                     link = "5-quant-splines", subject = "patient_id", data = BONUS_al3 ),

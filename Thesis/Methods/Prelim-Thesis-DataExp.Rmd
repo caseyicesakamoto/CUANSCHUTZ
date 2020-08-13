@@ -151,6 +151,22 @@ BONUS_Species =  BONUS_Species %>% mutate(taxa_group = case_when(grepl("Veillone
 BONUS_Species %>% group_by(molecular_id, Age) %>% summarise(sum_v = sum(grepl("Prevotella", OTU_Name)))
 # 92% other; 2.5% Prev; 3.6% Strep, 1.6% Veil
 describe(BONUS_Species$taxa_group)
+
+#### histograms before transform
+Veill = BONUS_Species %>%select(seq_count, taxa_group) %>%filter(taxa_group == "Veillonella")
+Strep = BONUS_Species %>%select(seq_count, taxa_group) %>%filter(taxa_group == "Streptococcus")
+Prevo = BONUS_Species %>%select(seq_count, taxa_group) %>%filter(taxa_group == "Prevotella")
+Neiss = BONUS_Species %>%select(seq_count, taxa_group) %>%filter(taxa_group == "Neisseria")
+Other = BONUS_Species %>%select(seq_count, taxa_group) %>%filter(taxa_group == "Other")
+
+par(mfrow = c(2,3))
+hist(Veill$seq_count, main = "Veillonella")
+hist(Strep$seq_count, main = "Streptococcus")
+hist(Prevo$seq_count, main = "Prevotella")
+hist(Neiss$seq_count, main = "Neisseria")
+hist(Other$seq_count, main = "Other")
+
+
 # =========================================== #
 ```
 
@@ -279,7 +295,7 @@ setDT(groups_ilr, keep.rownames = "molecular_id")[]
 # antibiotics, genotype, feeding types, growth seem likely to include
 # including Num_samples to decide whether to include those with < 3 visits
 BONUS_lcmm = BONUS_Species %>% select("Patient", "molecular_id","class", "sex_std","mic_il","curr_on", "cum","feed",
-                                      "Age", "agemos", "Num_Samples", "X_zwei", "X_zlen", "on", "age_firstabx") %>% unique.data.frame()
+                                      "Age", "agemos", "Num_Samples", "X_zwei", "X_zlen", "on", "age_firstabx", "seq_count","perc_total") %>% unique.data.frame()
 BONUS_lcmm = full_join(BONUS_lcmm, groups_clr, by= "molecular_id")
 BONUS_lcmm = full_join(BONUS_lcmm, groups_ilr, by = "molecular_id")
 
@@ -380,6 +396,8 @@ table1[15,1] = "" #positives
 table1= table1[-14,]
 # table 1
 kable(table1, caption = "Patient Characteristics at Baseline")
+
+hist(BONUS_Species$seq_count)
 ```
 
 ```{r write csv, eval=F, include=F}
